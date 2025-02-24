@@ -7,8 +7,9 @@ diffusers
 transformers
 streamlit
 altair<5
-huggingface_hub<0.26.0
+huggingface_hub
 git+https://github.com/facebookresearch/segment-anything.git
 gradio>=3.50
 fire
 PyMatting
+open3d
