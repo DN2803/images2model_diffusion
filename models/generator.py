@@ -7,4 +7,4 @@ def Generator (ABC):
     @abstractmethod
     def generate(self, *args, **kwargs):
         return self._generator.generate(*args, **kwargs)
-    
+from huggingface_hub import HfFolder, cached_download, hf_hub_download, model_info

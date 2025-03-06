@@ -84,4 +84,3 @@ def Zero123Plus(Generator):
         return self.generate_multiview_images(image)
 
 
-
