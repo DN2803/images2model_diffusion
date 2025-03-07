@@ -11,9 +11,13 @@ import subprocess
 from datetime import datetime
 from functools import partial
 from PIL import Image, ImageChops
+import open3d as o3d
 # from huggingface_hub import snapshot_download
 
 from ultils.image import ImageUtils
+
+from modules.pcl_generator.depth_image import DepthImage
+from modules.pcl_generator.pcl import PCL
 
 # from gradio_model3dcolor import Model3DColor
 # from gradio_model3dnormal import Model3DNormal
@@ -95,11 +99,33 @@ def create_tmp_dir():
     print("create tmp_exp_dir", tmp_dir)
     return tmp_dir
 
+def center_crop_and_resize(img, target_size=(320, 320)):
+    # Lấy kích thước ảnh gốc
+    width, height = img.size
+    
+    # Tính toán vùng crop để lấy phần giữa của ảnh
+    if width > height:
+        left = (width - height) // 2
+        top = 0
+        right = left + height
+        bottom = height
+    else:
+        left = 0
+        top = (height - width) // 2
+        right = width
+        bottom = top + width
 
+    # Cắt phần trung tâm của ảnh
+    img = img.crop((left, top, right, bottom))
+
+    # Resize ảnh về kích thước mong muốn
+    img = img.resize(target_size, Image.Resampling.LANCZOS)
+    
+    return img
 def preprocess_imgs(tmp_dir, input_img):
     for i, img_tuple in enumerate(input_img):
         img = Image.open(img_tuple[0])
-        img = img.resize((320, 320), Image.Resampling.LANCZOS)
+        img = center_crop_and_resize(img)
         img.save(f"{tmp_dir}/input_{i}.png")
         #TODO call segmentation API
         seg_img = ImageUtils.segment_img(img)
@@ -113,6 +139,16 @@ def ply_to_glb(ply_path):
     glb_path = ply_path.replace(".ply", ".glb")
     return glb_path
 
+def pcd_gen(tmp_dir, use_seg):
+    #TODO: call API to generate point cloud
+    pcl_paths = []
+    for i, image_tuple in enumerate(use_seg):
+        color_image_path = f"{tmp_dir}/seg_{i}.png"
+        DepthImage.generate(color_image_path, f"{tmp_dir}/depth_{i}.ply")
+        pcl_paths.append(f"{tmp_dir}/depth_{i}.ply")
+    pcl = PCL.generate(use_seg, pcl_paths) 
+    o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcl)
+    return ply_to_glb(f"{tmp_dir}/pcd.ply")
 
 def mesh_gen(tmp_dir, use_seg):
     #TODO: call API to generate mesh
@@ -226,6 +262,13 @@ def run_demo():
                                 variant="primary",
                                 interactive=False,
                             )
+                with gr.Row():
+                    with gr.Column(scale=5):
+                        pcl_output = gr.Model3D(
+                            label="Generated Point Cloud",
+                            elem_id="pcl-out",
+                            height=400,
+                        )
                 # with gr.Row():
                 #     with gr.Column(scale=5):
                 #         mesh_output = Model3DColor(
@@ -368,6 +411,19 @@ def run_demo():
             fn=disable_button,
             outputs=[run_btn],
             queue=False,
+        ).success(
+            fn=lambda: None,
+            outputs=[pcl_output],
+            queue=False,
+        ).success(
+            fn=partial(update_guide, "Generating the point cloud...", "wait"),
+            outputs=[guide_text],
+            queue=False,
+        ).success(
+            fn=pcd_gen,
+            inputs=[tmp_dir_unposed, bg_removed_checkbox],
+            outputs=[pcl_output],
+            queue=True,
         ).success(
         # ).success(
         #     fn=lambda: None,
