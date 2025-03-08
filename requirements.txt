@@ -13,3 +13,8 @@ gradio>=3.50
 fire
 PyMatting
 open3d
+trimesh
+onnxruntime
+git+https://github.com/facebookresearch/pytorch3d.git@stable
+timm
+matplotlib
