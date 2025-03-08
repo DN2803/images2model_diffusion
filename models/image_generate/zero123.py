@@ -15,12 +15,24 @@ from matting_postprocess import postprocess
 from ultils.image import ImageUtils
 from models.generator import Generator
 
-def Zero123Plus(Generator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._generator = Generator()
+class Zero123Plus(Generator):
+    def __init__(self):
 
-    def rescale(self, single_res, input_image, ratio=0.95):
+        ## load pipeline
+        # Load the pipeline
+        self.pipeline: DiffusionPipeline = DiffusionPipeline.from_pretrained(
+            "sudo-ai/zero123plus-v1.2", custom_pipeline="sudo-ai/zero123plus-pipeline",
+            torch_dtype=torch.float16, local_files_only=True
+        )
+        self.normal_pipeline = copy.copy(self.pipeline)
+        self.normal_pipeline.add_controlnet(ControlNetModel.from_pretrained(
+            "sudo-ai/controlnet-zp12-normal-gen-v1", torch_dtype=torch.float16, local_files_only=True
+        ), conditioning_scale=1.0)
+        self.pipeline.to("cuda:0", torch.float16)
+        self.normal_pipeline.to("cuda:0", torch.float16)
+
+
+    def __rescale(self, single_res, input_image, ratio=0.95):
         # Rescale and recenter
         image_arr = numpy.array(input_image)
         ret, mask = cv2.threshold(numpy.array(input_image.split()[-1]), 0, 255, cv2.THRESH_BINARY)
@@ -34,7 +46,7 @@ def Zero123Plus(Generator):
         return rgba
 
     
-    def generate_multiview_images(self, image, rows=3, cols=2):
+    def __generate_multiview_images(self, image, rows=3, cols=2):
         """
         Generate 6 multiview images from a single image using zero123plus model.
         Args:
@@ -44,23 +56,13 @@ def Zero123Plus(Generator):
         Returns:
             tuple: Tuple many of objecjt in type Image.Image.
         """
-        # Load the pipeline
-        pipeline: DiffusionPipeline = DiffusionPipeline.from_pretrained(
-            "sudo-ai/zero123plus-v1.2", custom_pipeline="sudo-ai/zero123plus-pipeline",
-            torch_dtype=torch.float16, local_files_only=True
-        )
-        normal_pipeline = copy.copy(pipeline)
-        normal_pipeline.add_controlnet(ControlNetModel.from_pretrained(
-            "sudo-ai/controlnet-zp12-normal-gen-v1", torch_dtype=torch.float16, local_files_only=True
-        ), conditioning_scale=1.0)
-        pipeline.to("cuda:0", torch.float16)
-        normal_pipeline.to("cuda:0", torch.float16)
+        
         # Run the pipeline
         cond = image
         # Optional: rescale input image if it occupies only a small region in input
-        cond = rescale(512, cond)
+        cond = self.__rescale(512, cond)
         # Generate 6 images
-        genimg = pipeline(
+        genimg = self.pipeline(
             cond,
             prompt='', guidance_scale=4, num_inference_steps=75, width=640, height=960
         ).images[0]
@@ -68,7 +70,7 @@ def Zero123Plus(Generator):
         # We observe that a higher CFG scale (4) is more robust
         # but with CFG = 1 it is faster and is usually good enough for normal image
         # You can adjust to your needs
-        normalimg = normal_pipeline(
+        normalimg = self.normal_pipeline(
             cond, depth_image=genimg,
             prompt='', guidance_scale=4, num_inference_steps=75, width=640, height=960
         ).images[0]
@@ -78,9 +80,9 @@ def Zero123Plus(Generator):
 
         genimgs = ImageUtils.split_image(genimg, rows, cols)
         normalimgs = ImageUtils.split_image(normalimg, rows, cols)
-        return tuple([genimgs, normalimgs])
+        return tuple(genimgs, normalimgs)
     
     def generate(self, image):
-        return self.generate_multiview_images(image)
+        return self.__generate_multiview_images(image)
 
 

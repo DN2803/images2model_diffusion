@@ -3,8 +3,9 @@ import numpy as np
 
 from models.depth_estimate.run_mcc import run_MCC as mcc
 
+
 from ultils.io import pcl2o3d
-class PCL:
+class PCL():
     def __init__(self, data=None):
         self.data = data
 
@@ -26,7 +27,6 @@ class PCL:
             pcd_next.transform(reg_p2p.transformation)
             pcd += pcd_next
         return pcd  
-    @staticmethod
     def generate(self, color_image_paths ,depth_images_paths):
 
         pcds = []

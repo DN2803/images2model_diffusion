@@ -16,7 +16,7 @@ import open3d as o3d
 
 from ultils.image import ImageUtils
 
-from modules.pcl_generator.depth_image import DepthImage
+from modules.pcl_generator.depth_image import DepthImages
 from modules.pcl_generator.pcl import PCL
 
 # from gradio_model3dcolor import Model3DColor
@@ -142,17 +142,15 @@ def ply_to_glb(ply_path):
 
 def pcd_gen(tmp_dir, use_seg):
     #TODO: call API to generate point cloud
-    pcl_paths = []
     seg_img_paths = []
     if use_seg:
         seg_img_paths = [f"{tmp_dir}/used_seg/{img}" for img in os.listdir(f"{tmp_dir}/used_seg")]
-    for i, image_tuple in enumerate(seg_img_paths):
-        color_image_path = f"{tmp_dir}/used_seg/seg_{i}.png"
-        depth_path = f"{tmp_dir}/depth_{i}.obj"
-        DepthImage.generate(color_image_path, depth_path)
-        pcl_paths.append(depth_path)
-    pcl = PCL.generate(use_seg, pcl_paths) 
-    o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcl)
+    gen_depth = DepthImages(seg_img_paths, f"{tmp_dir}/depth", f"{tmp_dir}/color")
+    depth_paths, color_paths = gen_depth.generator()
+    pcl = PCL()
+    pcd = pcl.generate(color_paths, depth_paths)
+
+    o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcd)
     return ply_to_glb(f"{tmp_dir}/pcd.ply")
 
 def mesh_gen(tmp_dir, use_seg):
