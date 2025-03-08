@@ -123,15 +123,16 @@ def center_crop_and_resize(img, target_size=(320, 320)):
     
     return img
 def preprocess_imgs(tmp_dir, input_img):
+    used_seg_dir = os.path.join(tmp_dir, "used_seg")
+    os.makedirs(used_seg_dir, exist_ok=True)
     for i, img_tuple in enumerate(input_img):
         img = Image.open(img_tuple[0])
         img = center_crop_and_resize(img)
         img.save(f"{tmp_dir}/input_{i}.png")
         #TODO call segmentation API
         seg_img = ImageUtils.segment_img(img)
-        seg_img.save(f"{tmp_dir}/seg_{i}.png")
-    return [Image.open(f"{tmp_dir}/seg_{i}.png") for i in range(len(input_img))]
-
+        seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
+    return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
 
 def ply_to_glb(ply_path):
     #TODO: call API to convert ply to glb
@@ -142,10 +143,14 @@ def ply_to_glb(ply_path):
 def pcd_gen(tmp_dir, use_seg):
     #TODO: call API to generate point cloud
     pcl_paths = []
-    for i, image_tuple in enumerate(use_seg):
-        color_image_path = f"{tmp_dir}/seg_{i}.png"
-        DepthImage.generate(color_image_path, f"{tmp_dir}/depth_{i}.ply")
-        pcl_paths.append(f"{tmp_dir}/depth_{i}.ply")
+    seg_img_paths = []
+    if use_seg:
+        seg_img_paths = [f"{tmp_dir}/used_seg/{img}" for img in os.listdir(f"{tmp_dir}/used_seg")]
+    for i, image_tuple in enumerate(seg_img_paths):
+        color_image_path = f"{tmp_dir}/used_seg/seg_{i}.png"
+        depth_path = f"{tmp_dir}/depth_{i}.obj"
+        DepthImage.generate(color_image_path, depth_path)
+        pcl_paths.append(depth_path)
     pcl = PCL.generate(use_seg, pcl_paths) 
     o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcl)
     return ply_to_glb(f"{tmp_dir}/pcd.ply")
@@ -470,7 +475,7 @@ def run_demo():
             queue=False,
         )
 
-    demo.launch()
+    demo.launch(share=True)
 
 if __name__ == "__main__":
     run_demo()
