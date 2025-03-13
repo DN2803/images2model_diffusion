@@ -128,5 +128,30 @@ class ImageUtils:
         segmented_img = Image.new("RGBA", img.size, (0, 0, 0, 0))
         segmented_img.paste(img, mask=Image.fromarray(sam_mask))
         return segmented_img
+    @staticmethod
+    def split_image(image: Image, rows=3, cols=2):
+        """
+        Cắt ảnh thành nhiều phần theo số hàng và cột.
+
+        Args:
+            image (Image): ảnh được tạo sinh.
+            rows (int): Số hàng cần cắt.
+            cols (int): Số cột cần cắt.
+
+        Returns:
+            tuple: Tuple chứa các ảnh đã cắt dưới dạng đối tượng Image.Image.
+        """
+        img_height, img_width = image.size
+        cell_width, cell_height = img_width // cols, img_height // rows
+
+        cropped_images = []
+        for i in range(rows):
+            for j in range(cols):
+                left, upper = j * cell_width, i * cell_height
+                right, lower = left + cell_width, upper + cell_height
+                cropped_img = image.crop((left, upper, right, lower))  
+                cropped_images.append(cropped_img)
+
+        return tuple(cropped_images)
 
 

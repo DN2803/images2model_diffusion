@@ -8,7 +8,7 @@ import torch
 import requests
 from PIL import Image
 from diffusers import DiffusionPipeline, ControlNetModel
-from matting_postprocess import postprocess
+from models.image_generate.matting_postprocess import postprocess
 
 
 # project's dependencies
