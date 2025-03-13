@@ -31,8 +31,13 @@ class PCL():
 
         pcds = []
         # TODO: Implement the conversion of depth image to point cloud
+        args = {
+            "resume": "co3dv2_all_categories.pth",
+            "granularity": 5,
+        }
+        mcc_predictor = mcc(**args)
         for color_image_path, depth_image_path in zip(color_image_paths, depth_images_paths):
-            pcd = mcc(image=color_image_path, point_cloud=depth_image_path)
+            pcd = mcc_predictor.predict(image=color_image_path, point_cloud=depth_image_path)
             pcds.append(pcd)
 
         # TODO: Implement fusion of point clouds

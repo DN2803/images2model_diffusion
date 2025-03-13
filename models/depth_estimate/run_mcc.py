@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 from ultils.weight import download_MCC_model
+import ultils.mcc.misc as misc 
 from models.depth_estimate.MCC import MCC_model, MCC_engine
 from pytorch3d.io.obj_io import load_obj
 from pytorch3d.structures import Pointclouds
@@ -24,19 +25,20 @@ def normalize(seen_xyz):
 
 
 class run_MCC():
-    def __init__(self):
+    def __init__(self, args):
         model_path = download_MCC_model()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
+        # checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
+        args.resume = model_path
+        args.viz_granularity = args.granularity
         self.model = MCC_model.get_mcc_model(
             occupancy_weight=1.0,
             rgb_weight=0.01,
-            checkpoint=checkpoint,
+            args=args,
         ).cuda()
-
-        print(self.model.load_state_dict(checkpoint["model"], strict=False))
-        self.model.eval() 
-    @staticmethod
+        misc.load_model(args=args, model_without_ddp=self.model, optimizer=None, loss_scaler=None)
+        # print(self.model.load_state_dict(checkpoint["model"], strict=False))
+        #self.model.eval() 
     def predict(self, args):
         score_thresholds=[0.1, 0.3, 0.5, 0.7, 0.9], 
         rgb = cv2.imread(args.image)
