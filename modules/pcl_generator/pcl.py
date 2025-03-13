@@ -1,5 +1,6 @@
 import open3d as o3d
 import numpy as np
+from types import SimpleNamespace
 
 from models.depth_estimate.run_mcc import run_MCC as mcc
 
@@ -31,11 +32,11 @@ class PCL():
 
         pcds = []
         # TODO: Implement the conversion of depth image to point cloud
-        args = {
-            "resume": "co3dv2_all_categories.pth",
-            "granularity": 5,
-        }
-        mcc_predictor = mcc(**args)
+        args = SimpleNamespace(
+            resume="co3dv2_all_categories.pth",
+            granularity=5
+        )
+        mcc_predictor = mcc(args)
         for color_image_path, depth_image_path in zip(color_image_paths, depth_images_paths):
             pcd = mcc_predictor.predict(image=color_image_path, point_cloud=depth_image_path)
             pcds.append(pcd)
