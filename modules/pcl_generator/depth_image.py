@@ -13,10 +13,10 @@ import numpy as np
 from PIL import Image
 
 class DepthImage(Generator):
-    def __init__(self, image=None):
-        self.image = image
+    def __init__(self):
+        self.model = DepthAnything()
 
-    def generate(self, output_path):
+    def generate(self, image, output_path):
         """
         Generate depth image from RGB image
         Args:
@@ -24,7 +24,7 @@ class DepthImage(Generator):
         - output_path: path to save depth image
         """
         
-        depth_image = DepthAnything.estimate_depth(self.image)
+        depth_image = self.model.estimate_depth(image)
         H, W = depth_image.shape  # Kích thước ảnh
 
         with open(output_path, "w") as obj_file:
@@ -54,15 +54,19 @@ class DepthImages():
         for i, image_path in enumerate(self.ori):
             image = Image.open(image_path)
             res_color_images, _ = zero123.generate(image)
-            color_images.append(res_color_images)
+            for img_tuple in res_color_images:
+                if isinstance(img_tuple, tuple) and len(img_tuple) > 0:
+                    color_images.append(img_tuple[0])  # Lấy ảnh từ tuple
+                else:
+                    color_images.append(img_tuple)  # Nếu không phải tuple, thêm trực tiếp 
             # normal_images.append(res_normal_images)
 
-
+        depth = DepthImage()
         for i, color_img in enumerate(color_images):
             depth_path = f"{self.target[0]}/depth{i}.obj"
             color_path = f"{self.target[1]}/color{i}.png"
-            DepthImage(color_img).generate(depth_path)
             color_img.save(color_path)
+            depth.generate(color_img, depth_path)
             depth_paths.append(depth_path)
             color_paths.append(color_path)
         return (color_paths, depth_paths)     

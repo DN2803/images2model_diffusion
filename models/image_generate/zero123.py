@@ -22,11 +22,11 @@ class Zero123Plus(Generator):
         # Load the pipeline
         self.pipeline: DiffusionPipeline = DiffusionPipeline.from_pretrained(
             "sudo-ai/zero123plus-v1.2", custom_pipeline="sudo-ai/zero123plus-pipeline",
-            torch_dtype=torch.float16, local_files_only=True
+            torch_dtype=torch.float16
         )
         self.normal_pipeline = copy.copy(self.pipeline)
         self.normal_pipeline.add_controlnet(ControlNetModel.from_pretrained(
-            "sudo-ai/controlnet-zp12-normal-gen-v1", torch_dtype=torch.float16, local_files_only=True
+            "sudo-ai/controlnet-zp12-normal-gen-v1", torch_dtype=torch.float16
         ), conditioning_scale=1.0)
         self.pipeline.to("cuda:0", torch.float16)
         self.normal_pipeline.to("cuda:0", torch.float16)
@@ -80,7 +80,7 @@ class Zero123Plus(Generator):
 
         genimgs = ImageUtils.split_image(genimg, rows, cols)
         normalimgs = ImageUtils.split_image(normalimg, rows, cols)
-        return tuple(genimgs, normalimgs)
+        return tuple([genimgs, normalimgs])
     
     def generate(self, image):
         return self.__generate_multiview_images(image)
