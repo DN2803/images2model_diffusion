@@ -141,7 +141,7 @@ class ImageUtils:
         Returns:
             tuple: Tuple chứa các ảnh đã cắt dưới dạng đối tượng Image.Image.
         """
-        img_height, img_width = image.size
+        img_width, img_height = image.size
         cell_width, cell_height = img_width // cols, img_height // rows
 
         cropped_images = []

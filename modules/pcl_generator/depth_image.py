@@ -25,7 +25,7 @@ class DepthImage(Generator):
         """
         
         depth_image = self.model.estimate_depth(image)
-        H, W = depth_image.shape  # Kích thước ảnh
+        W, H = depth_image.size  # Kích thước ảnh
 
         with open(output_path, "w") as obj_file:
             for v in range(H): 
@@ -54,6 +54,7 @@ class DepthImages():
         for i, image_path in enumerate(self.ori):
             image = Image.open(image_path)
             res_color_images, _ = zero123.generate(image)
+            print(type(res_color_images))
             for img_tuple in res_color_images:
                 if isinstance(img_tuple, tuple) and len(img_tuple) > 0:
                     color_images.append(img_tuple[0])  # Lấy ảnh từ tuple
