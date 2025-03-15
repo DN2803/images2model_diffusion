@@ -30,7 +30,7 @@ class DepthImage(Generator):
         with open(output_path, "w") as obj_file:
             for v in range(H): 
                 for u in range(W):
-                    z = depth_image[v, u]
+                    z = depth_image.getpixel((v, u))
                     if z == 0:
                         continue
                     x = u  # Sửa lỗi tuple
