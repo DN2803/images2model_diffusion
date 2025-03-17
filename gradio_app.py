@@ -135,9 +135,9 @@ def preprocess_imgs(tmp_dir, input_img):
     return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
 
 def ply_to_glb(ply_path):
-    #TODO: call API to convert ply to glb
-
     glb_path = ply_path.replace(".ply", ".glb")
+    mesh = trimesh.load(ply_path)
+    mesh.export(glb_path)
     return glb_path
 
 def pcd_gen(tmp_dir, use_seg):
@@ -146,7 +146,7 @@ def pcd_gen(tmp_dir, use_seg):
     if use_seg:
         seg_img_paths = [f"{tmp_dir}/used_seg/{img}" for img in os.listdir(f"{tmp_dir}/used_seg")]
     gen_depth = DepthImages(seg_img_paths, f"{tmp_dir}/depth", f"{tmp_dir}/color")
-    depth_paths, color_paths = gen_depth.generator()
+    color_paths, depth_paths = gen_depth.generator()
     pcl = PCL()
     pcd = pcl.generate(color_paths, depth_paths)
 

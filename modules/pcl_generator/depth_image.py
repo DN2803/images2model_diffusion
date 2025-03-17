@@ -31,8 +31,6 @@ class DepthImage(Generator):
             for v in range(H): 
                 for u in range(W):
                     z = depth_image.getpixel((v, u))
-                    if z == 0:
-                        continue
                     x = u  # Sửa lỗi tuple
                     y = v  # Sửa lỗi tuple
                     obj_file.write(f"v {x} {y} {z}\n")
