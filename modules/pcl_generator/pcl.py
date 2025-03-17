@@ -6,6 +6,7 @@ from models.depth_estimate.run_mcc import run_MCC as mcc
 
 
 from ultils.io import pcl2o3d
+
 class PCL():
     def __init__(self, data=None):
         self.data = data
@@ -19,6 +20,7 @@ class PCL():
 
         pcd = pcl2o3d.run(pcds[0])
         for i in range(1, len(pcds)):
+            o3d.io.write_point_cloud(f"output/pcd{i-1}.ply",pcds[i-1])
             pcd_next = pcl2o3d.run(pcds[i])
             reg_p2p = o3d.pipelines.registration.registration_icp(
                 pcd_next, pcd, threshold, trans_init,
@@ -41,7 +43,6 @@ class PCL():
             shrink_threshold=10.0
         )
         mcc_predictor = mcc(args)
-        i = 0
         for color_image_path, depth_image_path in zip(color_image_paths, depth_images_paths):
             args = SimpleNamespace(
                 image=color_image_path, 
@@ -59,9 +60,9 @@ class PCL():
                 
             )
             pcd = mcc_predictor.predict(args)
-            o3d.io.write_point_cloud(f"pcd{i}.ply", pcd)
+            
+
             pcds.append(pcd)
-            i=i+1
 
         # TODO: Implement fusion of point clouds
         raw_pcd = self.__fusion(pcds)
