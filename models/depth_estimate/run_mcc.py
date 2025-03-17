@@ -38,7 +38,7 @@ class run_MCC():
         ).cuda()
         misc.load_model(args=args, model_without_ddp=self.model, optimizer=None, loss_scaler=None)
         # print(self.model.load_state_dict(checkpoint["model"], strict=False))
-        #self.model.eval() 
+        self.model.eval() 
     def predict(self, args):
         score_thresholds=[0.1, 0.3, 0.5, 0.7, 0.9], 
         rgb = cv2.imread(args.image)

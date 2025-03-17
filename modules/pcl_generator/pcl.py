@@ -34,11 +34,21 @@ class PCL():
         # TODO: Implement the conversion of depth image to point cloud
         args = SimpleNamespace(
             resume="co3dv2_all_categories.pth",
-            granularity=5
+            granularity=5,
+            drop_path=0.,
+            regress_color=False,
+            temperature=0.1
         )
         mcc_predictor = mcc(args)
         for color_image_path, depth_image_path in zip(color_image_paths, depth_images_paths):
-            pcd = mcc_predictor.predict(image=color_image_path, point_cloud=depth_image_path)
+            args = SimpleNamespace(
+                image=color_image_path, 
+                point_cloud=depth_image_path,
+                seg=color_image_path,
+                regress_color=False,
+                temperature=0.1
+            )
+            pcd = mcc_predictor.predict(args)
             pcds.append(pcd)
 
         # TODO: Implement fusion of point clouds
