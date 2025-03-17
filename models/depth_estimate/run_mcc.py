@@ -40,7 +40,7 @@ class run_MCC():
         # print(self.model.load_state_dict(checkpoint["model"], strict=False))
         self.model.eval() 
     def predict(self, args):
-        score_thresholds=[0.1, 0.3, 0.5, 0.7, 0.9], 
+        score_thresholds=[0.9, 0.7, 0.5]
         rgb = cv2.imread(args.image)
         obj = load_obj(args.point_cloud)
         seen_rgb = (torch.tensor(rgb).float() / 255)[..., [2, 1, 0]]
@@ -55,13 +55,15 @@ class run_MCC():
         seen_xyz = obj[0].reshape(H, W, 3)
         seg = cv2.imread(args.seg, cv2.IMREAD_UNCHANGED)
         mask = torch.tensor(cv2.resize(seg, (W, H))).bool()
+        mask = mask[:, :, :3]  # Giữ lại 3 kênh đầu tiên
         seen_xyz[~mask] = float('inf')
 
         seen_xyz = normalize(seen_xyz)
 
-        bottom, right = mask.nonzero().max(dim=0)[0]
-        top, left = mask.nonzero().min(dim=0)[0]
-
+        # bottom, right = mask.nonzero().max(dim=0)[0]
+        # top, left = mask.nonzero().min(dim=0)[0]
+        bottom, right = mask[..., 0].nonzero().max(dim=0)[0]
+        top, left = mask[..., 0].nonzero().min(dim=0)[0]
         bottom = bottom + 40
         right = right + 40
         top = max(top - 40, 0)
@@ -136,7 +138,9 @@ class run_MCC():
         pred_occ = torch.nn.Sigmoid()(pred_occupy).cpu()
         
         for t in score_thresholds:
+            print(t)
             pos = pred_occ > t
+            
 
             points = unseen_xyz[pos].reshape((-1, 3))
             features = pred_colors[None][pos].reshape((-1, 3))

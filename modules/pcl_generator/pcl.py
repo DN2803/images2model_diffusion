@@ -37,19 +37,31 @@ class PCL():
             granularity=5,
             drop_path=0.,
             regress_color=False,
-            temperature=0.1
+            temperature=0.1,
+            shrink_threshold=10.0
         )
         mcc_predictor = mcc(args)
+        i = 0
         for color_image_path, depth_image_path in zip(color_image_paths, depth_images_paths):
             args = SimpleNamespace(
                 image=color_image_path, 
                 point_cloud=depth_image_path,
                 seg=color_image_path,
                 regress_color=False,
-                temperature=0.1
+                temperature=0.1,
+                use_hypersim=False,
+                semisphere_size=6.0,
+                co3d_world_size=3.0,
+                n_queries=550,
+                train_dist_threshold=0.1,
+                viz_granularity=0.1,
+                eval_granularity=0.1,
+                
             )
             pcd = mcc_predictor.predict(args)
+            o3d.io.write_point_cloud(f"pcd{i}.ply", pcd)
             pcds.append(pcd)
+            i=i+1
 
         # TODO: Implement fusion of point clouds
         raw_pcd = self.__fusion(pcds)
