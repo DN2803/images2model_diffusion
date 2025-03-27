@@ -12,7 +12,7 @@ from models.image_generate.matting_postprocess import postprocess
 
 
 # project's dependencies
-from ultils.image import ImageUtils
+from utils.image import ImageUtils
 from models.generator import Generator
 
 class Zero123Plus(Generator):

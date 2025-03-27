@@ -18,3 +18,4 @@ onnxruntime
 git+https://github.com/facebookresearch/pytorch3d.git@stable
 timm
 matplotlib
+omegaconf
