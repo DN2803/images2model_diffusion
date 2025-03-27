@@ -14,7 +14,7 @@ from PIL import Image, ImageChops
 import open3d as o3d
 # from huggingface_hub import snapshot_download
 
-from ultils.image import ImageUtils
+from utils.image import ImageUtils
 
 from modules.pcl_generator.depth_image import DepthImages
 from modules.pcl_generator.pcl import PCL
@@ -32,18 +32,12 @@ if not is_local_run:
     with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
         zip_ref.extractall(os.getcwd())
 
-# with open(f"{code_dir}/api.json", "r") as file:
-#     api_dict = json.load(file)
-#     SEGM_i_CALL = api_dict["SEGM_i_CALL"]
-#     UNPOSED_CALL = api_dict["UNPOSED_CALL"]
-#     MESH_CALL = api_dict["MESH_CALL"]
-
 
 _TITLE = (
-    """SpaRP: Fast 3D Object Reconstruction and Pose Estimation from Sparse Views"""
+    """Fast 3D Object Reconstruction and Pose Estimation from Sparse Views"""
 )
 _DESCRIPTION = (
-    """Try MCC reconstruct 3D textured mesh from one or a few unposed images!"""
+    """Reconstruct 3D textured mesh from one or a few unposed images!"""
 )
 
 
@@ -145,12 +139,14 @@ def pcd_gen(tmp_dir, use_seg):
     seg_img_paths = []
     if use_seg:
         seg_img_paths = [f"{tmp_dir}/used_seg/{img}" for img in os.listdir(f"{tmp_dir}/used_seg")]
-    gen_depth = DepthImages(seg_img_paths, f"{tmp_dir}/depth", f"{tmp_dir}/color")
-    color_paths, depth_paths = gen_depth.generator()
-    pcl = PCL()
-    pcd = pcl.generate(color_paths, depth_paths)
+    # gen_depth = DepthImages(seg_img_paths, f"{tmp_dir}/depth", f"{tmp_dir}/color")
+    # color_paths, depth_paths = gen_depth.generator()
+    # pcl = PCL()
+    # pcd = pcl.generate(color_paths, depth_paths)
+    # o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcd)
 
-    o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcd)
+    pcl_gen = PCL(seg_img_paths, tmp_dir)
+    pcl_gen.generate()
     return ply_to_glb(f"{tmp_dir}/pcd.ply")
 
 def mesh_gen(tmp_dir, use_seg):

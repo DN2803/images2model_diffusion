@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from ultils.weight import download_MCC_model
-import ultils.mcc.misc as misc 
+
+import utils.mcc.misc as misc 
 from models.depth_estimate.MCC import MCC_model, MCC_engine
 from pytorch3d.io.obj_io import load_obj
 from pytorch3d.structures import Pointclouds
@@ -26,18 +26,13 @@ def normalize(seen_xyz):
 
 class run_MCC():
     def __init__(self, args):
-        model_path = download_MCC_model()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
-        args.resume = model_path
-        args.viz_granularity = args.granularity
         self.model = MCC_model.get_mcc_model(
             occupancy_weight=1.0,
             rgb_weight=0.01,
             args=args,
         ).cuda()
         misc.load_model(args=args, model_without_ddp=self.model, optimizer=None, loss_scaler=None)
-        # print(self.model.load_state_dict(checkpoint["model"], strict=False))
         self.model.eval() 
     def predict(self, args):
         score_thresholds=[0.9, 0.7, 0.5]
@@ -52,18 +47,19 @@ class run_MCC():
             align_corners=False,
         )[0].permute(1, 2, 0)
 
+        
         seen_xyz = obj[0].reshape(H, W, 3)
         seg = cv2.imread(args.seg, cv2.IMREAD_UNCHANGED)
+        if seg.shape[2] == 4:
+            seg = seg[:, :, 3]
         mask = torch.tensor(cv2.resize(seg, (W, H))).bool()
-        mask = mask[:, :, :3]  # Giữ lại 3 kênh đầu tiên
         seen_xyz[~mask] = float('inf')
 
         seen_xyz = normalize(seen_xyz)
 
-        # bottom, right = mask.nonzero().max(dim=0)[0]
-        # top, left = mask.nonzero().min(dim=0)[0]
-        bottom, right = mask[..., 0].nonzero().max(dim=0)[0]
-        top, left = mask[..., 0].nonzero().min(dim=0)[0]
+        bottom, right = mask.nonzero().max(dim=0)[0]
+        top, left = mask.nonzero().min(dim=0)[0]
+        
         bottom = bottom + 40
         right = right + 40
         top = max(top - 40, 0)
