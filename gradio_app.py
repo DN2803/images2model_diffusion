@@ -144,8 +144,8 @@ def pcd_gen(tmp_dir, use_seg):
     # pcl = PCL()
     # pcd = pcl.generate(color_paths, depth_paths)
     # o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcd)
-
-    pcl_gen = PCL(seg_img_paths, tmp_dir)
+    ws = f"{tmp_dir}/used_seg/" if use_seg else tmp_dir
+    pcl_gen = PCL(ws, tmp_dir)
     pcl_gen.generate()
     return ply_to_glb(f"{tmp_dir}/pcd.ply")
 

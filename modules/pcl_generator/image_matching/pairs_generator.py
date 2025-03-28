@@ -21,7 +21,7 @@ class PairsGenerator:
 
     def _load_images(self) -> List[str]:
         """Load danh sách các ảnh trong folder."""
-        images = [f for f in os.listdir(self.folder_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
+        images = [f for f in os.listdir(self.images_path) if f.endswith(('.png', '.jpg', '.jpeg'))]
         images.sort()  # Để đảm bảo thứ tự cố định
         return images
 
