@@ -77,8 +77,8 @@ class MatcherBase(ABC):
         # Lưu matches vào match.h5
         with h5py.File(match_path, "w") as f_match:
             for (image0, image1), matches in updated_matches.items():
-                pair_name = f"{image0},{image1}"
-                grp = f_match.create_group(pair_name)
+                pair_name = (image0, image1)
+                grp = f_match.create_group(str(pair_name))
                 grp.create_dataset("matches", data=matches)
 
         print(f"✅ Keypoints đã gộp và lưu vào {feature_path}")
