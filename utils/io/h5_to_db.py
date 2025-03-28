@@ -357,38 +357,57 @@ def add_matches(db, h5_path, fname_to_id):
     n_total = (n_keys * (n_keys - 1)) // 2
 
     with tqdm(total=n_total) as pbar:
-        for key_1 in match_file.keys():
-            group = match_file[key_1]
-            for key_2 in group.keys():
-                id_1 = fname_to_id[key_1]
-                id_2 = fname_to_id[key_2]
+          
+        for key in match_file.keys():
+            try:
+                pair_name = eval(key)  # Chuyển từ chuỗi thành tuple
+            except Exception as e:
+                warnings.warn(f"Không thể parse {key}: {e}")
+                continue
 
-                pair_id = image_ids_to_pair_id(id_1, id_2)
-                if pair_id in added:
-                    warnings.warn(f"Pair {pair_id} ({id_1}, {id_2}) already added!")
-                    continue
+            if not isinstance(pair_name, tuple) or len(pair_name) != 2:
+                warnings.warn(f"Định dạng pair_name không hợp lệ: {pair_name}")
+                continue
 
-                matches = group[key_2][()]
-                
-                array_multiplied = matches * 25
+            image0, image1 = pair_name
 
-                # Bước 2: Tạo dãy kết quả
-                result = []
-                for i in range(array_multiplied.shape[0]):
-                    result.append(array_multiplied[i])
+            if image0 not in fname_to_id or image1 not in fname_to_id:
+                warnings.warn(f"Không tìm thấy ID cho {image0} hoặc {image1}")
+                continue
+
+            id_1 = fname_to_id[image0]
+            id_2 = fname_to_id[image1]
+            pair_id = image_ids_to_pair_id(id_1, id_2)
+
+            if pair_id in added:
+                warnings.warn(f"Pair {pair_id} ({id_1}, {id_2}) đã tồn tại!")
+                continue
+
+            group = match_file[key]
+            matches = group["matches"][:]  # Đọc dữ liệu từ HDF5
+
+                  
+                  # Nhân lên 25
+            array_multiplied = matches * 25
+
+                  # Tạo danh sách kết quả có kích thước đồng nhất
+            # Bước 2: Tạo dãy kết quả
+            result = []
+            for i in range(array_multiplied.shape[0]):
+                result.append(array_multiplied[i])
                     
-                    for j in range(24):
-                        next_point = array_multiplied[i] + np.array([j+1, j+1])
-                        result.append(next_point)
+                for j in range(24):
+                    next_point = array_multiplied[i] + np.array([j+1, j+1])
+                    result.append(next_point)
 
-                matches = np.array(result)
-                
-                # db.add_matches(id_1, id_2, matches)
-                db.add_two_view_geometry(id_1, id_2, matches)
+            matches = np.array(result)
+                #db.add_matches(id_1, id_2, result)
+                  # Lưu vào database
+            db.add_two_view_geometry(id_1, id_2, matches)
 
-                added.add(pair_id)
+            added.add(pair_id)
+            pbar.update(1)
 
-                pbar.update(1)
     match_file.close()
 
 
