@@ -15,7 +15,9 @@ PyMatting
 open3d
 trimesh
 onnxruntime
-git+https://github.com/facebookresearch/pytorch3d.git@stable
+# git+https://github.com/facebookresearch/pytorch3d.git@stable
 timm
 matplotlib
 omegaconf
+enlighten
+pycolmap

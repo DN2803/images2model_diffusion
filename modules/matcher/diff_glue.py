@@ -59,7 +59,7 @@ class DiffGlue(MatcherBase):
     def __init__(self):
         super().__init__()
     
-    def matching (self, image_pair, opt):
+    def matching (self, image_dir, image_pair, opt):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         config = {
             'superpoint': {
@@ -71,8 +71,8 @@ class DiffGlue(MatcherBase):
         matching = Matching(config).eval().to(device)
 
         # Load the image pair.
-        image0, inp0, scales0 = read_image(image_pair[0], device, opt.resize)
-        image1, inp1, scales1 = read_image(image_pair[1], device, opt.resize)
+        image0, inp0, scales0 = read_image(image_dir / image_pair[0], device, opt.resize)
+        image1, inp1, scales1 = read_image(image_dir / image_pair[1], device, opt.resize)
 
         pred = matching({'image0': inp0, 'image1': inp1})
         

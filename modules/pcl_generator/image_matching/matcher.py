@@ -36,4 +36,4 @@ class ImageMatcher ():
             )
             self.pairs = pairs_generator.run()
 
-        return self.pair_file
+        return self.pairs
