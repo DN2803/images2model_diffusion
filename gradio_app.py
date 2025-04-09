@@ -190,6 +190,7 @@ def run_demo():
     with gr.Blocks(title=_TITLE, css="style.css", theme=custom_theme) as demo:
         tmp_dir_unposed = gr.State("./demo_exp/placeholder")
         display_folder = os.path.join(os.path.dirname(__file__), "examples_display")
+        os.makedirs("examples_display", exist_ok=True)
         display_fns = os.listdir(display_folder)
         display_fns.sort()
         display_imgs = []
