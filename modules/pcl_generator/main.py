@@ -7,14 +7,30 @@ import pycolmap
 from tqdm import tqdm
 from pathlib import Path
 
-from modules.matcher.diff_glue import DiffGlue
-from modules.pcl_generator.image_matching.matcher import ImageMatcher
+from modules.pcl_generator.image_matching.image_matching import ImageMatching
 from utils.io.h5_to_db import export_to_colmap
 
 import logging
-
+import utils.timer as timer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+default_config = {
+    "general": {
+        "matching_strategy": "default",
+        "pair_file": None,
+        "retrieval": False,
+        "overlap": 0.5,
+        "db_path": None,
+        "upright": False,
+    },
+    "extractor": {
+        "name": "superpoint",
+        "max_keypoints": 10000,
+    },
+    "matcher": {
+        "name": "superglue",
+    },
+}
 
 class PCL:
     def __init__(self, images_dir, output_dir):
@@ -27,36 +43,37 @@ class PCL:
         with open("config/camera_options.yaml", "r") as file:
             self.camera_options = yaml.safe_load(file)
 
-    def match_features(self):
-        """Thực hiện tìm kiếm và matching keypoint giữa các ảnh."""
-        logging.info("🔍 Đang thực hiện matching keypoints...")
-
-        images_matching = ImageMatcher()
-        image_pairs = images_matching.generate_pairs(images_path=self.images_dir, method="sequential")
-
-        matched_pairs = {}
-        matcher = DiffGlue()
-        opt = argparse.Namespace()
-        opt.resize = [-1]
-        opt.nms_radius = 3
-        opt.keypoint_threshold = 0.005
-        opt.max_keypoints = 2048
-
-        for image_pair in tqdm(image_pairs, desc="Matching Image Pairs"):
-            pred = matcher.matching(self.images_dir, image_pair, opt)
-            matched_pairs[image_pair] = {
-                "keypoints0": pred['keypoints0'][0].cpu().numpy(),
-                "keypoints1": pred['keypoints1'][0].cpu().numpy(),
-                "matches": pred['matches0'][0].cpu().numpy(),
-                "confidence": pred['matching_scores0'][0].cpu().numpy()
-            }
-
-        matcher.save_to_h5(matched_pairs, self.feature_path, self.match_path)
-
-    def colmap_reconstruction(self):
+    def colmap_reconstruction(self, config=default_config):
         """Thực hiện quá trình tái tạo 3D bằng COLMAP."""
         logging.info("📸 Đang thực hiện COLMAP reconstruction...")
 
+        img_matching = ImageMatching(
+            imgs_dir=self.images_dir,
+            output_dir=self.output_dir,
+            matching_strategy=config.general["matching_strategy"],
+            local_features=config.extractor["name"],
+            matching_method=config.matcher["name"],
+            pair_file=config.general["pair_file"],
+            retrieval_option=config.general["retrieval"],
+            overlap=config.general["overlap"],
+            existing_colmap_model=config.general["db_path"],
+            custom_config=config.as_dict(),
+        )
+
+        pair_path = img_matching.generate_pairs()
+        logging.info(f"📂 Đã tạo file cặp ảnh: {pair_path}")
+        # Extract features
+        feature_path = img_matching.extract_features()
+        logging.info(f"📂 Đã tạo file đặc trưng: {feature_path}")
+        # Matching
+        match_path = img_matching.match_pairs(feature_path)
+        logging.info(f"📂 Đã tạo file khớp: {match_path}")
+
+        # If features have been extracted on "upright" images, this function bring features back to their original image orientation
+        if config.general["upright"]:
+            img_matching.rotate_back_features(feature_path)
+            timer.update("rotate_back_features")
+        logging.info("🗂️ Xuất dữ liệu từ h5 sang COLMAP database...")
         export_to_colmap(
             img_dir=self.images_dir,
             feature_path=self.feature_path,
@@ -85,7 +102,7 @@ class PCL:
         """Xuất kết quả ra file PLY."""
         logging.info("📂 Đang lưu kết quả dưới dạng PLY...")
 
-        reconstruction = pycolmap.Reconstruction(self.output_dir)
+        reconstruction = pycolmap.Reconstruction(self.output_dir / 'mvs')
         reconstruction.write_text(self.output_dir)  # Lưu dưới dạng text
         ply_path = self.output_dir / "pcl.ply"
         reconstruction.export_PLY(str(ply_path))  # Xuất PLY

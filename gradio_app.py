@@ -17,7 +17,7 @@ import open3d as o3d
 from utils.image import ImageUtils
 
 from modules.pcl_generator.depth_image import DepthImages
-from modules.pcl_generator.pcl import PCL
+from modules.pcl_generator.main import PCL
 
 # from gradio_model3dcolor import Model3DColor
 # from gradio_model3dnormal import Model3DNormal

@@ -21,3 +21,5 @@ matplotlib
 omegaconf
 enlighten
 pycolmap
+kornia
+exifread
