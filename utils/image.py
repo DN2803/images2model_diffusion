@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Tuple, Union
 
 import PIL
-from PIL import Image
+
+import PIL.Image
 import numpy
 import rembg
 import torch
@@ -131,17 +132,17 @@ class ImageUtils:
             numpy.concatenate([segmented_imgs[2], segmented_imgs[3]], axis=1),
             numpy.concatenate([segmented_imgs[4], segmented_imgs[5]], axis=1)
         ])
-        return Image.fromarray(result)
+        return PIL.Image.fromarray(result)
     @staticmethod
-    def segment_img(img: Image):
+    def segment_img(img: PIL.Image):
         output = rembg.remove(img)
         mask = numpy.array(output)[:, :, 3] > 0
         sam_mask = SAMAPI.segment_api(numpy.array(img)[:, :, :3], mask)
-        segmented_img = Image.new("RGBA", img.size, (0, 0, 0, 0))
-        segmented_img.paste(img, mask=Image.fromarray(sam_mask))
+        segmented_img = PIL.Image.new("RGBA", img.size, (0, 0, 0, 0))
+        segmented_img.paste(img, mask=PIL.Image.fromarray(sam_mask))
         return segmented_img
     @staticmethod
-    def split_image(image: Image, rows=3, cols=2):
+    def split_image(image: PIL.Image, rows=3, cols=2):
         """
         Cắt ảnh thành nhiều phần theo số hàng và cột.
 
