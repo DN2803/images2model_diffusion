@@ -16,7 +16,8 @@ from utils import (
     Timer,
     logger
 )
-from modules import extractors, matchers
+from models import extractors
+from modules import matchers
 from modules.extractors.extractor_base import extractor_loader
 from modules.matchers.matcher_base import matcher_loader
 from .pairs_generator import PairsGenerator
