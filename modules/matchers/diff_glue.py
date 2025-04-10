@@ -5,7 +5,7 @@ import torch
 
 from models.matchers.models.matching import Matching
 
-from modules.matcher.matcher_base import MatcherBase
+from modules.matchers.matcher_base import MatcherBase
 torch.set_grad_enabled(False)
 
 import random

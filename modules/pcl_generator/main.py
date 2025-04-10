@@ -1,6 +1,6 @@
 import os
 import argparse
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 import yaml
 import numpy as np
 import open3d as o3d
@@ -39,6 +39,7 @@ class Config:
     general: GeneralConfig = field(default_factory=GeneralConfig)
     extractor: ExtractorConfig = field(default_factory=ExtractorConfig)
     matcher: MatcherConfig = field(default_factory=MatcherConfig)
+default_config = Config()
 
 class PCL:
     def __init__(self, images_dir, output_dir):
@@ -65,7 +66,7 @@ class PCL:
             retrieval_option=config.general.retrieval,
             overlap=config.general.overlap,
             existing_colmap_model=config.general.db_path,
-            custom_config=config.as_dict(),
+            custom_config=asdict(config),
         )
 
         pair_path = img_matching.generate_pairs()
