@@ -1,6 +1,6 @@
 import os
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import yaml
 import numpy as np
 import open3d as o3d
@@ -36,11 +36,10 @@ class MatcherConfig:
 
 @dataclass
 class Config:
-    general: GeneralConfig = GeneralConfig()
-    extractor: ExtractorConfig = ExtractorConfig()
-    matcher: MatcherConfig = MatcherConfig()
+    general: GeneralConfig = field(default_factory=GeneralConfig)
+    extractor: ExtractorConfig = field(default_factory=ExtractorConfig)
+    matcher: MatcherConfig = field(default_factory=MatcherConfig)
 
-default_config = Config()
 class PCL:
     def __init__(self, images_dir, output_dir):
         self.images_dir = Path(images_dir)
