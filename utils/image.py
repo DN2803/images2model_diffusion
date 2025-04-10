@@ -18,7 +18,7 @@ import numpy as np
 from utils import IMAGE_EXT, logger
 from utils.sensor_width_database import SensorWidthDatabase
 
-Image.MAX_IMAGE_PIXELS = None
+PIL.Image.MAX_IMAGE_PIXELS = None
 
 
 

@@ -117,7 +117,7 @@ class MatcherBase(metaclass=ABCMeta):
                 **custom_config.get("matcher", {}),
             },
         }
-# TODO
+
         if "min_inliers_per_pair" in custom_config["general"]:
             self.min_inliers_per_pair = custom_config["general"]["min_inliers_per_pair"]
         if "min_inlier_ratio_per_pair" in custom_config["general"]:
