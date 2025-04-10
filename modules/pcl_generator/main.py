@@ -1,5 +1,6 @@
 import os
 import argparse
+from dataclasses import dataclass
 import yaml
 import numpy as np
 import open3d as o3d
@@ -14,24 +15,32 @@ import logging
 import utils.timer as timer
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-default_config = {
-    "general": {
-        "matching_strategy": "default",
-        "pair_file": None,
-        "retrieval": False,
-        "overlap": 0.5,
-        "db_path": None,
-        "upright": False,
-    },
-    "extractor": {
-        "name": "superpoint",
-        "max_keypoints": 10000,
-    },
-    "matcher": {
-        "name": "superglue",
-    },
-}
 
+@dataclass
+class GeneralConfig:
+    matching_strategy: str = "default"
+    pair_file: str = None
+    retrieval: bool = False
+    overlap: float = 0.5
+    db_path: str = None
+    upright: bool = False
+
+@dataclass
+class ExtractorConfig:
+    name: str = "superpoint"
+    max_keypoints: int = 10000
+
+@dataclass
+class MatcherConfig:
+    name: str = "diffglue"
+
+@dataclass
+class Config:
+    general: GeneralConfig = GeneralConfig()
+    extractor: ExtractorConfig = ExtractorConfig()
+    matcher: MatcherConfig = MatcherConfig()
+
+default_config = Config()
 class PCL:
     def __init__(self, images_dir, output_dir):
         self.images_dir = Path(images_dir)
@@ -46,17 +55,17 @@ class PCL:
     def colmap_reconstruction(self, config=default_config):
         """Thực hiện quá trình tái tạo 3D bằng COLMAP."""
         logging.info("📸 Đang thực hiện COLMAP reconstruction...")
-
+        print("Config:", config)
         img_matching = ImageMatching(
             imgs_dir=self.images_dir,
             output_dir=self.output_dir,
-            matching_strategy=config.general["matching_strategy"],
-            local_features=config.extractor["name"],
-            matching_method=config.matcher["name"],
-            pair_file=config.general["pair_file"],
-            retrieval_option=config.general["retrieval"],
-            overlap=config.general["overlap"],
-            existing_colmap_model=config.general["db_path"],
+            matching_strategy=config.general.matching_strategy,
+            local_features=config.extractor.name,
+            matching_method=config.matcher.name,
+            pair_file=config.general.pair_file,
+            retrieval_option=config.general.retrieval,
+            overlap=config.general.overlap,
+            existing_colmap_model=config.general.db_path,
             custom_config=config.as_dict(),
         )
 
@@ -111,7 +120,6 @@ class PCL:
 
     def generate(self):
         """Chạy toàn bộ pipeline."""
-        self.match_features()
         self.colmap_reconstruction()
         self.save_ply()
 
