@@ -123,10 +123,10 @@ def preprocess_imgs(tmp_dir, input_img):
         img = Image.open(img_tuple[0])
         img = center_crop_and_resize(img)
         img.save(f"{tmp_dir}/input_{i}.png")
-        #TODO call segmentation API
-        seg_img = ImageUtils.segment_img(img)
-        seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
-    return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
+    #     #TODO call segmentation API
+    #     seg_img = ImageUtils.segment_img(img)
+    #     seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
+    # return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
 
 def ply_to_glb(ply_path):
     glb_path = ply_path.replace(".ply", ".glb")

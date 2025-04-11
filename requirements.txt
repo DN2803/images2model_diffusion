@@ -23,3 +23,4 @@ enlighten
 pycolmap
 kornia
 exifread
+h5py
