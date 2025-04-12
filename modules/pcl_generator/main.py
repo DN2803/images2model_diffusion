@@ -13,6 +13,7 @@ from utils.io.h5_to_db import export_to_colmap
 
 import logging
 import utils.timer as timer
+from utils import Quality
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
@@ -25,6 +26,8 @@ class GeneralConfig:
     db_path: str = None
     upright: bool = False
     verbose: bool = True
+    quality: Quality.MEDIUM
+
 
 @dataclass
 class ExtractorConfig:
