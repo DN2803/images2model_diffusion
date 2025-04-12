@@ -58,7 +58,7 @@ class PCL:
         logging.info("📸 Đang thực hiện COLMAP reconstruction...")
         print("Config:", config)
 
-        if config.general["pair_file"] is not None:
+        if config.general.pair_file is not None:
             self.pair_file_path = self.images_dir / config.general["pair_file"]
             logging.info(f"📂 Đã tải file cặp ảnh từ: {self.pair_file_path}")
         img_matching = ImageMatching(
