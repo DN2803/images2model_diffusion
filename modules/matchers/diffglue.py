@@ -149,9 +149,10 @@ class DiffGlueMatcher(MatcherBase):
         }
         # kpts0 = pred['keypoints0'][0].cpu().numpy()
         # kpts1 = pred['keypoints1'][0].cpu().numpy()
-        matches = pred['matches0'][0].cpu().numpy()
+        # matches = pred['matches0'][0].cpu().numpy()
         # confidence = pred['matching_scores0'][0].cpu().numpy()
 
+        matches = pred['matches0']
         return matches
 
     
