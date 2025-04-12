@@ -135,7 +135,7 @@ class ImageMatching:
             **self.default_conf_general,
             **custom_config["general"],
         }
-
+        print("Custom config:", self.custom_config["general"])
         # Check that parameters are valid
         if retrieval_option == "sequential":
             if overlap is None:
