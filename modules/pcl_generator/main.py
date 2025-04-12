@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 @dataclass
 class GeneralConfig:
-    matching_strategy: str = "default"
+    matching_strategy: str = "bruteforce"
     pair_file: str = None
     retrieval: bool = False
     overlap: float = 0.5
