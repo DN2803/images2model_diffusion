@@ -129,6 +129,8 @@ class ImageMatching:
         self.overlap = overlap
         self.existing_colmap_model = existing_colmap_model
 
+        if self.output_dir.exists():
+            custom_config["general"]["output_dir"] = self.output_dir
         # Merge default and custom config
         self.custom_config = custom_config
         self.custom_config["general"] = {
