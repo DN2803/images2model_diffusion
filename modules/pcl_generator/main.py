@@ -45,6 +45,7 @@ class PCL:
     def __init__(self, images_dir, output_dir):
         self.images_dir = Path(images_dir)
         self.output_dir = Path(output_dir)
+        self.pair_file_path = self.output_dir / "pairs.txt"
         self.database_path = self.output_dir / "database.db"
         self.feature_path = self.output_dir / "feature.h5"
         self.match_path = self.output_dir / "match.h5"
@@ -56,13 +57,17 @@ class PCL:
         """Thực hiện quá trình tái tạo 3D bằng COLMAP."""
         logging.info("📸 Đang thực hiện COLMAP reconstruction...")
         print("Config:", config)
+
+        if config.general["pair_file"] is not None:
+            self.pair_file_path = self.images_dir / config.general["pair_file"]
+            logging.info(f"📂 Đã tải file cặp ảnh từ: {self.pair_file_path}")
         img_matching = ImageMatching(
             imgs_dir=self.images_dir,
             output_dir=self.output_dir,
             matching_strategy=config.general.matching_strategy,
             local_features=config.extractor.name,
             matching_method=config.matcher.name,
-            pair_file=config.general.pair_file,
+            pair_file=self.pair_file_path,
             retrieval_option=config.general.retrieval,
             overlap=config.general.overlap,
             existing_colmap_model=config.general.db_path,
