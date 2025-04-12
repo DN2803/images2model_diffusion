@@ -152,7 +152,7 @@ class DiffGlueMatcher(MatcherBase):
         # matches = pred['matches0'][0].cpu().numpy()
         # confidence = pred['matching_scores0'][0].cpu().numpy()
 
-        matches = pred['matches0']
+        matches = pred['matches0'][0]
         return matches
 
     
