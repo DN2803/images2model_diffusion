@@ -24,6 +24,7 @@ class GeneralConfig:
     overlap: float = 0.5
     db_path: str = None
     upright: bool = False
+    verbose: bool = True
 
 @dataclass
 class ExtractorConfig:
