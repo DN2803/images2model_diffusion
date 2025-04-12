@@ -94,7 +94,14 @@ def features_2_sg(
 
     return data
 
+def correspondence_matrix_from_matches0(
+    kpts_number: int, matches0: np.ndarray
+) -> np.ndarray:
+    n_tie_points = np.arange(kpts_number).reshape((-1, 1))
+    matrix = np.hstack((n_tie_points, matches0.reshape((-1, 1))))
+    correspondences = matrix[~np.any(matrix == -1, axis=1)]
 
+    return correspondences
 
 class DiffGlueMatcher(MatcherBase): 
     default_config = {
@@ -151,8 +158,10 @@ class DiffGlueMatcher(MatcherBase):
         # kpts1 = pred['keypoints1'][0].cpu().numpy()
         # matches = pred['matches0'][0].cpu().numpy()
         # confidence = pred['matching_scores0'][0].cpu().numpy()
+        
+        # Make correspondence matrix from matches0
+        matches0 = pred["matches0"]
+        kpts_number = feats0["keypoints"].shape[0]
+        correspondences = correspondence_matrix_from_matches0(kpts_number, matches0)
 
-        matches = pred['matches0'][0]
-        return matches
-
-    
+        return correspondences
