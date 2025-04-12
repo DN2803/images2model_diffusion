@@ -60,7 +60,7 @@ class PCL:
         print("Config:", config)
 
         if config.general.pair_file is not None:
-            self.pair_file_path = self.images_dir / config.general["pair_file"]
+            self.pair_file_path = self.images_dir / config.general.pair_file
             logging.info(f"📂 Đã tải file cặp ảnh từ: {self.pair_file_path}")
         img_matching = ImageMatching(
             imgs_dir=self.images_dir,
@@ -85,7 +85,7 @@ class PCL:
         logging.info(f"📂 Đã tạo file khớp: {match_path}")
 
         # If features have been extracted on "upright" images, this function bring features back to their original image orientation
-        if config.general["upright"]:
+        if config.general.upright:
             img_matching.rotate_back_features(feature_path)
             timer.update("rotate_back_features")
         logging.info("🗂️ Xuất dữ liệu từ h5 sang COLMAP database...")
