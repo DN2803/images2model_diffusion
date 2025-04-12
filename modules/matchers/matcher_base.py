@@ -82,6 +82,8 @@ class MatcherBase(metaclass=ABCMeta):
         "tile_overlap": 0,
         "force_cpu": False,
         "do_viz": False,
+        "gv_threshold": 4,
+        "gv_confidence": 0.99999,
     }
     default_conf = {}
     required_inputs = []
