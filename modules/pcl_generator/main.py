@@ -48,8 +48,8 @@ class PCL:
         self.output_dir = Path(output_dir)
         self.pair_file_path = self.output_dir / "pairs.txt"
         self.database_path = self.output_dir / "database.db"
-        self.feature_path = self.output_dir / "feature.h5"
-        self.match_path = self.output_dir / "match.h5"
+        self.feature_path = self.output_dir / "features.h5"
+        self.match_path = self.output_dir / "matches.h5"
 
         with open("config/camera_options.yaml", "r") as file:
             self.camera_options = yaml.safe_load(file)
@@ -80,9 +80,12 @@ class PCL:
         # Extract features
         feature_path = img_matching.extract_features()
         logging.info(f"📂 Đã tạo file đặc trưng: {feature_path}")
+        self.feature_path = feature_path
+
         # Matching
         match_path = img_matching.match_pairs(feature_path)
         logging.info(f"📂 Đã tạo file khớp: {match_path}")
+        self.match_path = match_path
 
         # If features have been extracted on "upright" images, this function bring features back to their original image orientation
         if config.general.upright:
