@@ -26,7 +26,6 @@ class GeneralConfig:
     db_path: str = None
     upright: bool = False
     verbose: bool = True
-    quality: Quality.MEDIUM
 
 
 @dataclass

@@ -97,7 +97,7 @@ def save_features_h5(
 class ExtractorBase(metaclass=ABCMeta):
     general_conf = {
         "output_dir": None,
-        "quality": Quality.HIGH,
+        "quality": Quality.MEDIUM,
         "tile_selection": TileSelection.NONE,
         "tile_size": (1024, 1024),  # (x, y) or (width, height)
         "tile_overlap": 0,  # in pixels
