@@ -36,6 +36,31 @@ default_camera_options = {
     },
 }
 
+def add_surrounding_points(v):
+    # Tạo các điểm xung quanh trong bán kính 1 và bán kính 2
+    offsets = np.array([
+        [-2, -2], [-2, -1], [-2, 0], [-2, 1], [-2, 2],  # Hàng trên cùng
+        [-1, -2], [-1, 2],  # Hàng thứ hai
+        [ 0, -2],          [ 0, 2],  # Hàng giữa (bỏ điểm gốc)
+        [ 1, -2], [ 1, 2],  # Hàng thứ tư
+        [ 2, -2], [ 2, -1], [ 2, 0], [ 2, 1], [ 2, 2],  # Hàng dưới cùng
+
+        [-1, -1], [-1, 0], [-1, 1],  # Hàng trên thứ hai
+        [ 0, -1],           [ 0, 1],  # Hàng giữa (bỏ điểm gốc)
+        [ 1, -1], [ 1, 0], [ 1, 1], # Hàng dưới thứ hai
+    ])
+    
+    # Tạo mảng mới để chứa các điểm gốc và điểm mới
+    # Kích thước của mảng mới là (số điểm gốc) * 17, vì mỗi điểm gốc có 17 điểm tương ứng (gốc + 16 điểm xung quanh)
+    expanded_v = np.empty((v.shape[0] * 25, 2), dtype=int)
+    
+    # Thêm điểm gốc và các điểm xung quanh vào mảng mới
+    for i in range(v.shape[0]):
+        expanded_v[i*25] = v[i]  # Điểm gốc
+        expanded_v[i*25+1:i*25+25] = v[i] + offsets  # 24 điểm xung quanh
+
+    return expanded_v
+
 
 def export_to_colmap(
     img_dir: Path,
@@ -234,7 +259,7 @@ def add_keypoints(
         k = 0
         for filename in tqdm(list(keypoint_f.keys())):
             keypoints = keypoint_f[filename]["keypoints"].__array__()
-
+            keypoints = np.array(add_surrounding_points(keypoints))
             path = os.path.join(image_path, filename)
             if not os.path.isfile(path):
                 raise IOError(f"Invalid image path {path}")
@@ -300,8 +325,22 @@ def add_raw_matches(db: Path, h5_path: Path, fname_to_id: dict):
                     warnings.warn(f"Pair {pair_id} ({id_1}, {id_2}) already added!")
                     continue
 
-                matches = group[key_2][()]
+                matches = np.array(group[key_2][()])
+                array_multiplied = matches * 25
+
+                # Bước 2: Tạo dãy kết quả
+                result = []
+                for i in range(array_multiplied.shape[0]):
+                    result.append(array_multiplied[i])
+                    
+                    for j in range(24):
+                        next_point = array_multiplied[i] + np.array([j+1, j+1])
+                        result.append(next_point)
+
+                matches = np.array(result)
+                
                 db.add_matches(id_1, id_2, matches)
+                
                 # db.add_two_view_geometry(id_1, id_2, matches)
 
                 added.add(pair_id)
@@ -330,6 +369,20 @@ def add_matches(db, h5_path, fname_to_id):
                     continue
 
                 matches = group[key_2][()]
+                
+                array_multiplied = matches * 25
+
+                # Bước 2: Tạo dãy kết quả
+                result = []
+                for i in range(array_multiplied.shape[0]):
+                    result.append(array_multiplied[i])
+                    
+                    for j in range(24):
+                        next_point = array_multiplied[i] + np.array([j+1, j+1])
+                        result.append(next_point)
+
+                matches = np.array(result)
+                
                 # db.add_matches(id_1, id_2, matches)
                 db.add_two_view_geometry(id_1, id_2, matches)
 

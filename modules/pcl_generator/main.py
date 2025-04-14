@@ -31,7 +31,7 @@ class GeneralConfig:
 @dataclass
 class ExtractorConfig:
     name: str = "superpoint"
-    max_keypoints: int = 10000
+    max_keypoints: int = 2048
 
 @dataclass
 class MatcherConfig:

@@ -97,7 +97,7 @@ def save_features_h5(
 class ExtractorBase(metaclass=ABCMeta):
     general_conf = {
         "output_dir": None,
-        "quality": Quality.MEDIUM,
+        "quality": Quality.HIGH,
         "tile_selection": TileSelection.NONE,
         "tile_size": (1024, 1024),  # (x, y) or (width, height)
         "tile_overlap": 0,  # in pixels
@@ -135,6 +135,7 @@ class ExtractorBase(metaclass=ABCMeta):
                 **custom_config.get("extractor", {}),
             },
         }
+        logger.debug(f"Extractor config: {self._config}")
 
         # Get main processing parameters and save them as class members
         self._quality = self._config["general"]["quality"]
