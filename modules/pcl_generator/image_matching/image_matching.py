@@ -62,7 +62,7 @@ class ImageMatching:
     """
 
     default_conf_general = {
-        "quality": Quality.MEDIUM,
+        "quality": Quality.HIGH,
         "tile_selection": TileSelection.NONE,
         "geom_verification": GeometricVerification.PYDEGENSAC,
         "output_dir": "output",
@@ -190,12 +190,15 @@ class ImageMatching:
             raise ValueError(
                 f"Invalid matcher. {self.matching_method} is not supported."
             )
-        if self.matching_method == "lightglue":
-            self._matcher = Matcher(
-                local_features=self.local_features, config=self.custom_config
-            )
-        else:
-            self._matcher = Matcher(self.custom_config)
+        # if self.matching_method == "lightglue":
+        #     self._matcher = Matcher(
+        #         local_features=self.local_features, config=self.custom_config
+        #     )
+        # else:
+        #     self._matcher = Matcher(self.custom_config)
+        self._matcher = Matcher(
+            self.local_features, config=self.custom_config
+        )
 
         # Print configuration
         logger.info("Running image matching with the following configuration:")
