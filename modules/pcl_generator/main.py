@@ -145,7 +145,7 @@ class PCL:
         convert_format=True,
         )
         logging.info("Depth images")
-        depth_images = DepthImages(self.images_dir, self.dense_path/"depths_mvsnet")
+        depth_images = DepthImages(self.dense_path/"images", self.dense_path/"depths_mvsnet")
         depth_images.generator()
         logging.info("fusion")
         run_conversion(self.dense_path)
