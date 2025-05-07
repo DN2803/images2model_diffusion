@@ -311,7 +311,7 @@ def colmap2mvsnet(colmap_folder_path: Path, images_path: Path, output_path: Path
     output_path = Path(output_path)
     
     # Đọc COLMAP model
-    cameras, images, points3D = read_model(colmap_folder_path, ext='.txt')
+    cameras, images, points3D = read_model(colmap_folder_path, ext='.bin')
 
     # Tạo thư mục đầu ra
     img_out_dir = output_path / "images"
