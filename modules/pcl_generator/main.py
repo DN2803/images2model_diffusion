@@ -18,8 +18,8 @@ import utils.timer as timer
 from utils import Quality
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-from depth_image import DepthImages
-from dense_pcl.depth_fusion import run_conversion
+from modules.pcl_generator.depth_image import DepthImages
+from modules.pcl_generator.dense_pcl.depth_fusion import run_conversion
 @dataclass
 class GeneralConfig:
     matching_strategy: str = "bruteforce"
