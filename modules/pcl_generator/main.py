@@ -11,12 +11,15 @@ from pathlib import Path
 from modules.pcl_generator.image_matching.image_matching import ImageMatching
 from utils.io.h5_to_db import export_to_colmap
 
+from utils.colmap2mvsmet import colmap2mvsnet
+
 import logging
 import utils.timer as timer
 from utils import Quality
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-
+from depth_image import DepthImages
+from dense_pcl.depth_fusion import run_conversion
 @dataclass
 class GeneralConfig:
     matching_strategy: str = "bruteforce"
@@ -52,6 +55,8 @@ class PCL:
         self.database_path = self.output_dir / "database.db"
         self.feature_path = self.output_dir / "features.h5"
         self.match_path = self.output_dir / "matches.h5"
+        self.dense_path = self.output_dir / "dense"
+        self.sparse_path = self.output_dir / "sparse"
 
         with open("config/camera_options.yaml", "r") as file:
             self.camera_options = yaml.safe_load(file)
@@ -102,7 +107,7 @@ class PCL:
             camera_options=self.camera_options
         )
 
-        output = self.output_dir / "mvs"
+        output = self.sparse_path
         num_images = pycolmap.Database(self.database_path).num_images
 
         logging.info(f"🖼️ Tổng số ảnh: {num_images}")
@@ -128,10 +133,30 @@ class PCL:
         reconstruction.export_PLY(str(ply_path))  # Xuất PLY
 
         logging.info(f"✅ Kết quả đã lưu tại: {ply_path}")
+    def save_ply_dense(self):
+        """Xuất kết quả ra file PLY."""
+        colmap2mvsnet(
+        colmap_folder_path=self.sparse_path / "0",
+        images_path=self.images_dir,    
+        output_path=self.dense_path,
+        
+        test=True,
+        convert_format=True,
+        )
+        depth_images = DepthImages(self.images_dir, self.dense_path)
+        depth_images.generator()
 
+        run_conversion(self.dense_path,
+                       )
+        
+
+    
+        reconstruction = pycolmap.Reconstruction(self.dense_path)
+        reconstruction.write_text(self.dense_path)
     def generate(self):
         """Chạy toàn bộ pipeline."""
         self.colmap_reconstruction()
-        self.save_ply()
+
+        self.save_ply_dense()
 
     
