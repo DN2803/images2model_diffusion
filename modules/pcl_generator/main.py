@@ -135,6 +135,7 @@ class PCL:
         logging.info(f"✅ Kết quả đã lưu tại: {ply_path}")
     def save_ply_dense(self):
         """Xuất kết quả ra file PLY."""
+        logging.info("📂 chuyển format sang mvs")
         colmap2mvsnet(
         colmap_folder_path=self.sparse_path / "0",
         images_path=self.images_dir,    
@@ -143,16 +144,11 @@ class PCL:
         test=True,
         convert_format=True,
         )
-        depth_images = DepthImages(self.images_dir, self.dense_path)
+        logging.info("Depth images")
+        depth_images = DepthImages(self.images_dir, self.dense_path/"depths_mvsnet")
         depth_images.generator()
-
-        run_conversion(self.dense_path,
-                       )
-        
-
-    
-        reconstruction = pycolmap.Reconstruction(self.dense_path)
-        reconstruction.write_text(self.dense_path)
+        logging.info("fusion")
+        run_conversion(self.dense_path)
     def generate(self):
         """Chạy toàn bộ pipeline."""
         self.colmap_reconstruction()
