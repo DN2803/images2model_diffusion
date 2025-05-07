@@ -27,6 +27,11 @@ class DepthImage(Generator):
         """
         
         depth_image = self.model.estimate_depth(image)
+        if isinstance(depth_image, Image.Image):
+            depth_image = np.array(depth_image)
+
+        if depth_image.dtype != np.float32:
+            depth_image = depth_image.astype(np.float32)
         self.save_pfm(depth_image, output_path)
         self.create_prob_pfm_from_depth(output_path)
 
