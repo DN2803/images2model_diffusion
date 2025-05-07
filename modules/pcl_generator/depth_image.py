@@ -56,7 +56,7 @@ class DepthImages():
 
     def generator(self):
         depth = DepthImage()
-        image_files = sorted(list(self.images_dir.glob("*")))
+        image_files = sorted(list(self.ori.glob("*")))
         for i, image_path in enumerate(image_files):
             img = Image.open(image_path).convert("RGB")
             basename = image_path.stem
