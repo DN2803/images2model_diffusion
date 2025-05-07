@@ -45,7 +45,7 @@ class DepthImage(Generator):
             f.write(f"{image.shape[1]} {image.shape[0]}\n".encode())
             f.write(b"-1.0\n")  # Little endian
             image.tofile(f)
-    def create_prob_pfm_from_depth(depth_path):
+    def create_prob_pfm_from_depth(self, depth_path):
         depth = iio.imread(depth_path, format='PFM')  # Đọc file .pfm
         prob = np.ones_like(depth, dtype=np.float32)  # Xác suất toàn bộ = 1.0
 
