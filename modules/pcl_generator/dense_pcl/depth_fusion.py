@@ -21,7 +21,7 @@ import cv2
 import numpy as np
 
 import pylab as plt
-from preprocess import * 
+from modules.pcl_generator.dense_pcl.preprocess import * 
 
 def read_gipuma_dmb(path):
     '''read Gipuma .dmb format image'''
