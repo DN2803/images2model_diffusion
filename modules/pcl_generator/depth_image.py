@@ -9,6 +9,7 @@ from PIL import Image
 from models.generator import Generator
 from models.depth_estimate.depth_anythingV2 import DepthAnything
 from models.image_generate.zero123 import Zero123Plus
+from modules.pcl_generator.dense_pcl.preprocess import load_pfm, write_pfm
 
 import numpy as np
 from PIL import Image
@@ -32,25 +33,15 @@ class DepthImage(Generator):
 
         if depth_image.dtype != np.float32:
             depth_image = depth_image.astype(np.float32)
-        self.save_pfm(depth_image, output_path)
+        write_pfm(output_path, image)
         self.create_prob_pfm_from_depth(output_path)
-
-
-    def save_pfm(self, image: np.ndarray, filename: Path):
-        if image.dtype.name != 'float32':
-            raise Exception('Image dtype must be float32.')
-        image = np.flipud(image)
-        with open(filename, 'wb') as f:
-            f.write(b'Pf\n')
-            f.write(f"{image.shape[1]} {image.shape[0]}\n".encode())
-            f.write(b"-1.0\n")  # Little endian
-            image.tofile(f)
+        
     def create_prob_pfm_from_depth(self, depth_path):
-        depth = iio.imread(depth_path, format='PFM')  # Đọc file .pfm
+        depth = load_pfm(depth_path)  # Đọc file .pfm
         prob = np.ones_like(depth, dtype=np.float32)  # Xác suất toàn bộ = 1.0
 
         prob_path = depth_path.replace("_init.pfm", "_prob.pfm")
-        iio.imwrite(prob_path, prob, format='PFM')
+        write_pfm(prob_path, prob)
         print(f"Saved {prob_path}")
 class DepthImages():
     def __init__(self, images_dir: Path, depth_dir: Path):
