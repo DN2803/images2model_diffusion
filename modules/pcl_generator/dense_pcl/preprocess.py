@@ -99,36 +99,95 @@ def load_cam(file, interval_scale=1):
         cam[1][3][3] = 0
 
     return cam
-def load_pfm(file):
-    color = None
-    width = None
-    height = None
-    scale = None
-    data_type = None
-    header = file.readline().decode('UTF-8').rstrip()
+# def load_pfm(file):
+#     color = None
+#     width = None
+#     height = None
+#     scale = None
+#     data_type = None
+#     header = file.readline().decode('UTF-8').rstrip()
 
+#     if header == 'PF':
+#         color = True
+#     elif header == 'Pf':
+#         color = False
+#     else:
+#         raise Exception('Not a PFM file.')
+#     dim_match = re.match(r'^(\d+)\s(\d+)\s$', file.readline().decode('UTF-8'))
+#     if dim_match:
+#         width, height = map(int, dim_match.groups())
+#     else:
+#         raise Exception('Malformed PFM header.')
+#     # scale = float(file.readline().rstrip())
+#     scale = float((file.readline()).decode('UTF-8').rstrip())
+#     if scale < 0: # little-endian
+#         data_type = '<f'
+#     else:
+#         data_type = '>f' # big-endian
+#     data_string = file.read()
+#     data = np.fromstring(data_string, data_type)
+#     shape = (height, width, 3) if color else (height, width)
+#     data = np.reshape(data, shape)
+#     data = cv2.flip(data, 0)
+#     return data
+
+# def write_pfm(file, image, scale=1):
+#     file = open(file, mode='wb')
+#     color = None
+
+#     if image.dtype.name != 'float32':
+#         raise Exception('Image dtype must be float32.')
+
+#     image = np.flipud(image)
+
+#     if len(image.shape) == 3 and image.shape[2] == 3: # color image
+#         color = True
+#     elif len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1: # greyscale
+#         color = False
+#     else:
+#         raise Exception('Image must have H x W x 3, H x W x 1 or H x W dimensions.')
+
+#     file.write(('PF\n' if color else 'Pf\n').encode())
+#     file.write(('%d %d\n' % (image.shape[1], image.shape[0])).encode())
+
+#     endian = image.dtype.byteorder
+
+#     if endian == '<' or endian == '=' and sys.byteorder == 'little':
+#         scale = -scale
+
+#     file.write('%f\n' % scale)
+
+#     image_string = image.tostring()
+#     file.write(image_string)
+
+#     file.close()
+def load_pfm(file):
+    header = file.readline().decode('UTF-8').rstrip()
     if header == 'PF':
         color = True
     elif header == 'Pf':
         color = False
     else:
         raise Exception('Not a PFM file.')
-    dim_match = re.match(r'^(\d+)\s(\d+)\s$', file.readline().decode('UTF-8'))
+
+    dim_line = file.readline().decode('UTF-8').strip()
+    dim_match = re.match(r'^(\d+)\s+(\d+)$', dim_line)
     if dim_match:
         width, height = map(int, dim_match.groups())
     else:
         raise Exception('Malformed PFM header.')
-    # scale = float(file.readline().rstrip())
-    scale = float((file.readline()).decode('UTF-8').rstrip())
-    if scale < 0: # little-endian
-        data_type = '<f'
+
+    scale = float(file.readline().decode('UTF-8').strip())
+    if scale < 0:
+        data_type = '<f'  # little-endian
     else:
-        data_type = '>f' # big-endian
+        data_type = '>f'  # big-endian
+
     data_string = file.read()
-    data = np.fromstring(data_string, data_type)
+    data = np.frombuffer(data_string, dtype=data_type)
     shape = (height, width, 3) if color else (height, width)
     data = np.reshape(data, shape)
-    data = cv2.flip(data, 0)
+    data = np.flipud(data)
     return data
 
 def write_pfm(file, image, scale=1):
@@ -140,24 +199,22 @@ def write_pfm(file, image, scale=1):
 
     image = np.flipud(image)
 
-    if len(image.shape) == 3 and image.shape[2] == 3: # color image
+    if len(image.shape) == 3 and image.shape[2] == 3:  # color image
         color = True
-    elif len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1: # greyscale
+    elif len(image.shape) == 2 or (len(image.shape) == 3 and image.shape[2] == 1):  # greyscale
         color = False
     else:
         raise Exception('Image must have H x W x 3, H x W x 1 or H x W dimensions.')
 
-    file.write('PF\n' if color else 'Pf\n')
-    file.write('%d %d\n' % (image.shape[1], image.shape[0]))
+    file.write(('PF\n' if color else 'Pf\n').encode())
+    file.write(('%d %d\n' % (image.shape[1], image.shape[0])).encode())
 
     endian = image.dtype.byteorder
-
-    if endian == '<' or endian == '=' and sys.byteorder == 'little':
+    if endian == '<' or (endian == '=' and sys.byteorder == 'little'):
         scale = -scale
 
-    file.write('%f\n' % scale)
+    file.write(('%f\n' % scale).encode())
 
-    image_string = image.tostring()
+    image_string = image.tobytes()
     file.write(image_string)
-
     file.close()
