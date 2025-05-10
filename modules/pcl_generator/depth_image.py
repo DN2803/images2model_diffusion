@@ -33,7 +33,7 @@ class DepthImage(Generator):
 
         if depth_image.dtype != np.float32:
             depth_image = depth_image.astype(np.float32)
-        write_pfm(output_path, image)
+        write_pfm(output_path, depth_image)
         self.create_prob_pfm_from_depth(output_path)
         
     def create_prob_pfm_from_depth(self, depth_path):
