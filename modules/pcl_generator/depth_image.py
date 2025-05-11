@@ -40,7 +40,7 @@ class DepthImage(Generator):
         depth = load_pfm(depth_path)  # Đọc file .pfm
         prob = np.ones_like(depth, dtype=np.float32)  # Xác suất toàn bộ = 1.0
 
-        prob_path = depth_path.replace("_init.pfm", "_prob.pfm")
+        prob_path = Path(str(depth_path).replace("_init.pfm", "_prob.pfm"))
         write_pfm(prob_path, prob)
         print(f"Saved {prob_path}")
 class DepthImages():
