@@ -33,7 +33,7 @@ class GeneralConfig:
 
 @dataclass
 class ExtractorConfig:
-    name: str = "superpoint"
+    name: str = "aliked"
     max_keypoints: int = 2048
 
 @dataclass
