@@ -20,7 +20,7 @@ class AlikedExtractor(ExtractorBase):
 
     # config from LightGlue implementation of ALIKED
     default_conf = {
-        "name:": "aliked",
+        "name": "aliked",
         "model": "aliked-n16rot",
         "device": "cuda",
         "max_num_keypoints": 4000,
