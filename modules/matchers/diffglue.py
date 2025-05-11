@@ -116,7 +116,7 @@ class DiffGlueMatcher(MatcherBase):
         super().__init__(config)
         cfg = {**self.default_config, **self._config.get("matcher", {})}
         local_feat_name = cfg.get("local_features", "superpoint")
-
+        print(local_feat_name)
         if local_feat_name not in ["superpoint", "aliked"]:
             raise ValueError(f"Local feature '{local_feat_name}' is not supported. Please choose either 'superpoint' or 'aliked'.")
 
