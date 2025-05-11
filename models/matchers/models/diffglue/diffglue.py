@@ -561,6 +561,7 @@ class DiffGlue(nn.Module):
     def __init__(self, conf) -> None:
         super().__init__()
         self.conf = conf = OmegaConf.merge(self.default_conf, conf)
+        print(conf)
 
         self.time_embed_channels = conf.descriptor_dim * 4
         self.time_embed = nn.Sequential(
