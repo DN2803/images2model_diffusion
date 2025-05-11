@@ -34,6 +34,7 @@ class AlikedExtractor(ExtractorBase):
         "force_num_keypoints": False,
         "pretrained": True,
         "nms_radius": 2,
+        "device": "cuda",
     }
     required_inputs = []
     grayscale = False
