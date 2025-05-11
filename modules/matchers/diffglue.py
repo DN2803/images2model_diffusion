@@ -125,6 +125,8 @@ class DiffGlueMatcher(MatcherBase):
         exper = Path("./models/matchers/weights/SP_DiffGlue.tar")
 
         if local_feat_name == "aliked":
+            default_conf["local_features"] = "aliked"
+            default_conf["input_dim"] = 128
             exper = Path("./models/matchers/weights/ALIKED_DiffGlue.tar")
         ckpt = exper
         ckpt = torch.load(str(ckpt), map_location="cpu")
