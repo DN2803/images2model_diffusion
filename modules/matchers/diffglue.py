@@ -121,13 +121,16 @@ class DiffGlueMatcher(MatcherBase):
             raise ValueError(f"Local feature '{local_feat_name}' is not supported. Please choose either 'superpoint' or 'aliked'.")
 
         default_conf = OmegaConf.create(DiffGluePipeline.default_conf)
-        self._matcher = DiffGluePipeline(default_conf).eval().cuda()  # load the matcher
         exper = Path("./models/matchers/weights/SP_DiffGlue.tar")
 
         if local_feat_name == "aliked":
             default_conf["local_features"] = "aliked"
             default_conf["input_dim"] = 128
+            print(default_conf)
             exper = Path("./models/matchers/weights/ALIKED_DiffGlue.tar")
+
+        self._matcher = DiffGluePipeline(default_conf).eval().cuda()  # load the matcher
+
         ckpt = exper
         ckpt = torch.load(str(ckpt), map_location="cpu")
 
