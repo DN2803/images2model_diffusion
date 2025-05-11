@@ -196,9 +196,9 @@ class ImageMatching:
             )
         else:
             self._matcher = Matcher(self.custom_config)
-        # self._matcher = Matcher(
-        #     self.local_features, config=self.custom_config
-        # )
+            # self._matcher = Matcher(
+            #     self.local_features, config=self.custom_config
+            # )
 
         # Print configuration
         logger.info("Running image matching with the following configuration:")

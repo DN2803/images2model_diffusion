@@ -34,11 +34,13 @@ class GeneralConfig:
 @dataclass
 class ExtractorConfig:
     name: str = "aliked"
-    max_keypoints: int = 2048
+    max_keypoints: int = 4000
 
 @dataclass
 class MatcherConfig:
     name: str = "diffglue"
+    local_features: "aliked"
+    input_dim: 128
 
 @dataclass
 class Config:
