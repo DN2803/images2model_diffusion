@@ -28,6 +28,7 @@ class AlikedExtractor(ExtractorBase):
     #     "nms_radius": 2,
     # }
     default_conf = {
+        "name": "aliked-n16",
         "model_name": "aliked-n16",
         "max_num_keypoints": -1,
         "detection_threshold": 0.2,
