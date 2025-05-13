@@ -542,7 +542,7 @@ class DiffGlue(nn.Module):
         "name": "diffglue",  # just for interfacing
         "input_dim": 128,  # input descriptor dimension (autoselected from weights)
         "add_scale_ori": False,
-        "descriptor_dim": 128,
+        "descriptor_dim": 256,
         "n_layers": -1,
         "num_heads": 4,
         "flash": False,  # enable FlashAttention if available.
