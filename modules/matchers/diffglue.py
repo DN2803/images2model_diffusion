@@ -116,7 +116,7 @@ class DiffGlueMatcher(MatcherBase):
         super().__init__(config)
         cfg = {**self.default_config, **self._config.get("matcher", {})}
         local_feat_name = cfg.get("local_features", "superpoint")
-        print(local_feat_name)
+        print("after load config",local_feat_name)
         if local_feat_name not in ["superpoint", "aliked"]:
             raise ValueError(f"Local feature '{local_feat_name}' is not supported. Please choose either 'superpoint' or 'aliked'.")
 
@@ -127,6 +127,7 @@ class DiffGlueMatcher(MatcherBase):
             # default_conf["local_features"] = "aliked"
             # default_conf["input_dim"] = 128
             print(default_conf)
+            print("Load aliked_ dg model: ALIKED_DiffGlue.tar")
             exper = Path("./models/matchers/weights/ALIKED_DiffGlue.tar")
 
         self._matcher = DiffGluePipeline(default_conf).eval().cuda()  # load the matcher
