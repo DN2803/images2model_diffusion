@@ -39,8 +39,8 @@ class ExtractorConfig:
 @dataclass
 class MatcherConfig:
     name: str = "diffglue"
-    local_features: "aliked"
-    input_dim: 128
+    local_features: str = "aliked"
+    input_dim: int = 128
 
 @dataclass
 class Config:
