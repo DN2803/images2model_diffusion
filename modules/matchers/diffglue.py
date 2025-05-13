@@ -129,7 +129,7 @@ class DiffGlueMatcher(MatcherBase):
             print(default_conf)
             print("Load aliked_ dg model: ALIKED_DiffGlue.tar")
             exper = Path("./models/matchers/weights/ALIKED_DiffGlue.tar")
-
+        print("default config: ", default_conf)
         self._matcher = DiffGluePipeline(default_conf).eval().cuda()  # load the matcher
 
         ckpt = exper

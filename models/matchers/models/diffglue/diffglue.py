@@ -540,9 +540,9 @@ def filter_matches(scores: torch.Tensor, th: float):
 class DiffGlue(nn.Module):
     default_conf = {
         "name": "diffglue",  # just for interfacing
-        "input_dim": 256,  # input descriptor dimension (autoselected from weights)
+        "input_dim": 128,  # input descriptor dimension (autoselected from weights)
         "add_scale_ori": False,
-        "descriptor_dim": 256,
+        "descriptor_dim": 128,
         "n_layers": -1,
         "num_heads": 4,
         "flash": False,  # enable FlashAttention if available.
