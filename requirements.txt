@@ -24,3 +24,4 @@ pycolmap
 kornia
 exifread
 h5py
+pydegensac
