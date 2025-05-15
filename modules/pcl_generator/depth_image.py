@@ -9,7 +9,7 @@ from PIL import Image
 from models.generator import Generator
 from models.depth_estimate.depth_anythingV2 import DepthAnything
 from models.image_generate.zero123 import Zero123Plus
-from modules.pcl_generator.dense_pcl.preprocess import load_pfm, write_pfm
+from utils.mvs.preprocess import load_pfm, write_pfm
 
 import numpy as np
 from PIL import Image
