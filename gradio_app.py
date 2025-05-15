@@ -121,7 +121,7 @@ def preprocess_imgs(tmp_dir, input_img):
     os.makedirs(used_seg_dir, exist_ok=True)
     for i, img_tuple in enumerate(input_img):
         img = Image.open(img_tuple[0])
-        img = center_crop_and_resize(img)
+        # img = center_crop_and_resize(img)
         img.save(f"{tmp_dir}/input_{i}.png")
     #     #TODO call segmentation API
     #     seg_img = ImageUtils.segment_img(img)
