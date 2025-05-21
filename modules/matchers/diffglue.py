@@ -122,8 +122,11 @@ class DiffGlueMatcher(MatcherBase):
             raise ValueError(f"Local feature '{local_feat_name}' is not supported. Please choose either 'superpoint' or 'aliked'.")
 
         default_conf = OmegaConf.create(DiffGluePipeline.default_conf)
+        cfg.pop("name", None)
 
-        merged_conf = OmegaConf.merge(default_conf["matcher"], OmegaConf.create(cfg))
+        custom_conf = {"matcher": cfg}
+
+        merged_conf = OmegaConf.merge(default_conf["matcher"], custom_conf)
 
         exper = Path("./models/matchers/weights/SP_DiffGlue.tar")
 
