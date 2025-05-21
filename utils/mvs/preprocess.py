@@ -17,6 +17,8 @@ import sys
 
 import cv2
 import numpy as np
+
+from PIL import Image
 # import tensorflow as tf
 import scipy.io
 import urllib
@@ -211,3 +213,115 @@ def write_pfm(path: Path, image, scale=1):
 
         file.write(f"{scale}\n".encode())
         file.write(image.tobytes())
+
+
+# read intrinsics and extrinsics
+def read_camera_parameters(filename):
+    with open(filename) as f:
+        lines = f.readlines()
+        lines = [line.rstrip() for line in lines]
+    # extrinsics: line [1,5), 4x4 matrix
+    extrinsics = np.fromstring(' '.join(lines[1:5]), dtype=np.float32, sep=' ').reshape((4, 4))
+    # intrinsics: line [7-10), 3x3 matrix
+    intrinsics = np.fromstring(' '.join(lines[7:10]), dtype=np.float32, sep=' ').reshape((3, 3))
+    # TODO: assume the feature is 1/4 of the original image size
+    intrinsics[:2, :] /= 4
+    return intrinsics, extrinsics
+# read an image
+def read_img(filename):
+    img = Image.open(filename)
+    # scale 0~255 to 0~1
+    np_img = np.array(img, dtype=np.float32) / 255.
+    return np_img
+
+
+# read a binary mask
+def read_mask(filename):
+    return read_img(filename) > 0.5
+
+
+# save a binary mask
+def save_mask(filename, mask):
+    assert mask.dtype == np.bool
+    mask = mask.astype(np.uint8) * 255
+    Image.fromarray(mask).save(filename)
+
+# read a pair file, [(ref_view1, [src_view1-1, ...]), (ref_view2, [src_view2-1, ...]), ...]
+def read_pair_file(filename):
+    data = []
+    with open(filename) as f:
+        num_viewpoint = int(f.readline())
+        # 49 viewpoints
+        for view_idx in range(num_viewpoint):
+            ref_view = int(f.readline().rstrip())
+            src_views = [int(x) for x in f.readline().rstrip().split()[1::2]]
+            data.append((ref_view, src_views))
+    return data
+
+
+def read_pfm(filename):
+    file = open(filename, 'rb')
+    color = None
+    width = None
+    height = None
+    scale = None
+    endian = None
+
+    header = file.readline().decode('utf-8').rstrip()
+    if header == 'PF':
+        color = True
+    elif header == 'Pf':
+        color = False
+    else:
+        raise Exception('Not a PFM file.')
+
+    dim_match = re.match(r'^(\d+)\s(\d+)\s$', file.readline().decode('utf-8'))
+    if dim_match:
+        width, height = map(int, dim_match.groups())
+    else:
+        raise Exception('Malformed PFM header.')
+
+    scale = float(file.readline().rstrip())
+    if scale < 0:  # little-endian
+        endian = '<'
+        scale = -scale
+    else:
+        endian = '>'  # big-endian
+
+    data = np.fromfile(file, endian + 'f')
+    shape = (height, width, 3) if color else (height, width)
+
+    data = np.reshape(data, shape)
+    data = np.flipud(data)
+    file.close()
+    return data, scale
+
+
+def save_pfm(filename, image, scale=1):
+    file = open(filename, "wb")
+    color = None
+
+    image = np.flipud(image)
+
+    if image.dtype.name != 'float32':
+        raise Exception('Image dtype must be float32.')
+
+    if len(image.shape) == 3 and image.shape[2] == 3:  # color image
+        color = True
+    elif len(image.shape) == 2 or len(image.shape) == 3 and image.shape[2] == 1:  # greyscale
+        color = False
+    else:
+        raise Exception('Image must have H x W x 3, H x W x 1 or H x W dimensions.')
+
+    file.write('PF\n'.encode('utf-8') if color else 'Pf\n'.encode('utf-8'))
+    file.write('{} {}\n'.format(image.shape[1], image.shape[0]).encode('utf-8'))
+
+    endian = image.dtype.byteorder
+
+    if endian == '<' or endian == '=' and sys.byteorder == 'little':
+        scale = -scale
+
+    file.write(('%f\n' % scale).encode('utf-8'))
+
+    image.tofile(file)
+    file.close()

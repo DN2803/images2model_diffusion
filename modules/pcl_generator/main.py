@@ -151,10 +151,10 @@ class PCL:
         depth_images.generator()
         logging.info("fusion")
         run_conversion(self.dense_path)
-    def generate(self):
+    def generate(self, config):
         """Chạy toàn bộ pipeline."""
-        self.colmap_reconstruction()
+        self.colmap_reconstruction(config=config)
 
-        self.save_ply_dense()
+        # self.save_ply_dense()
 
     
