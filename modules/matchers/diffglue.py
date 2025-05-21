@@ -115,6 +115,8 @@ class DiffGlueMatcher(MatcherBase):
         """Initializes a DiffGlueMatcher object with the given options dictionary."""
         super().__init__(config)
         cfg = {**self.default_config, **self._config.get("matcher", {})}
+        cfg = {**self.default_config, **self._config}
+        print("before load config",cfg)
         local_feat_name = cfg.get("local_features", "superpoint")
         print("after load config",local_feat_name)
         if local_feat_name not in ["superpoint", "aliked"]:
@@ -124,13 +126,10 @@ class DiffGlueMatcher(MatcherBase):
         exper = Path("./models/matchers/weights/SP_DiffGlue.tar")
 
         if local_feat_name == "aliked":
-            default_conf["local_features"] = "aliked"
-            default_conf["input_dim"] = 128
-            print(default_conf)
             print("Load aliked_ dg model: ALIKED_DiffGlue.tar")
             exper = Path("./models/matchers/weights/ALIKED_DiffGlue.tar")
         print("default config: ", default_conf)
-        self._matcher = DiffGluePipeline(default_conf).eval().cuda()  # load the matcher
+        self._matcher = DiffGluePipeline(cfg).eval().cuda()  # load the matcher
 
         ckpt = exper
         ckpt = torch.load(str(ckpt), map_location="cpu")
