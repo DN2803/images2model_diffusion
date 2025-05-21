@@ -39,7 +39,7 @@ class ExtractorConfig:
 @dataclass
 class MatcherConfig:
     name: str = "diffglue"
-    local_features: str = "aliked"
+    features: str = "aliked"
     input_dim: int = 128
 
 @dataclass
@@ -158,3 +158,4 @@ class PCL:
         # self.save_ply_dense()
 
     
+

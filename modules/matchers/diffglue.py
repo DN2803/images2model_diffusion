@@ -109,15 +109,14 @@ class DiffGlueMatcher(MatcherBase):
         "nms_radius": 3,
         "keypoint_threshold": 0.005,
         "max_keypoints": 2048,
-        "local_features": "superpoint",
+        "features": "superpoint",
     }
     def __init__(self, config) -> None:
         """Initializes a DiffGlueMatcher object with the given options dictionary."""
         super().__init__(config)
         cfg = {**self.default_config, **self._config.get("matcher", {})}
-        cfg = {**self.default_config, **self._config}
         print("before load config",cfg)
-        local_feat_name = cfg.get("local_features", "superpoint")
+        local_feat_name = cfg.get("features", "superpoint")
         print("after load config",local_feat_name)
         if local_feat_name not in ["superpoint", "aliked"]:
             raise ValueError(f"Local feature '{local_feat_name}' is not supported. Please choose either 'superpoint' or 'aliked'.")
