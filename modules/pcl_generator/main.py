@@ -125,11 +125,11 @@ class PCL:
         pbar.close()
         return recs
 
-    def save_ply(self):
+    def save_ply_sparse(self):
         """Xuất kết quả ra file PLY."""
         logging.info("📂 Đang lưu kết quả dưới dạng PLY...")
 
-        reconstruction = pycolmap.Reconstruction(self.output_dir)
+        reconstruction = pycolmap.Reconstruction(self.sparse_path / "0")
         reconstruction.write_text(self.output_dir)  # Lưu dưới dạng text
         ply_path = self.output_dir / "pcl.ply"
         reconstruction.export_PLY(str(ply_path))  # Xuất PLY
@@ -154,7 +154,7 @@ class PCL:
     def generate(self, config=default_config):
         """Chạy toàn bộ pipeline."""
         self.colmap_reconstruction(config=config)
-
+        self.save_ply_sparse()
         # self.save_ply_dense()
 
     
