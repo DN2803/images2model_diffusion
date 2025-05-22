@@ -132,29 +132,29 @@ class PointCloudProcessing:
         print(f"Saved point cloud to {output_file}")
 
 
-# Đọc và xử lý đám mây điểm từ file .ply
-ply_input_file = "redbui.ply"
-ply_output_file = "phatpointcloud.ply"
+# # Đọc và xử lý đám mây điểm từ file .ply
+# ply_input_file = "redbui.ply"
+# ply_output_file = "phatpointcloud.ply"
 
-pcd_processor = PointCloudProcessing(ply_input_file)
+# pcd_processor = PointCloudProcessing(ply_input_file)
 
-# Lọc nhiễu bằng DBSCAN và SOR
-pcd_processor.filter_with_dbscan(eps=0.13, min_points=3)
-pcd_processor.remove_outliers()
-#pcd_processor.remove_outliers()
+# # Lọc nhiễu bằng DBSCAN và SOR
+# pcd_processor.filter_with_dbscan(eps=0.13, min_points=3)
+# pcd_processor.remove_outliers()
+# #pcd_processor.remove_outliers()
 
 
 
-# # Chuyển đổi lại đám mây điểm sau khi xử lý sang file .ply
-#pcd_processor.xyz_to_ply_nocolor(ply_output_file)
-pcd_processor.xyz_to_ply_color(ply_output_file)
+# # # Chuyển đổi lại đám mây điểm sau khi xử lý sang file .ply
+# #pcd_processor.xyz_to_ply_nocolor(ply_output_file)
+# pcd_processor.xyz_to_ply_color(ply_output_file)
 
-#pcd_processor.save_ply_file(ply_output_file)
+# #pcd_processor.save_ply_file(ply_output_file)
 
-mesh_path = "ao vl.obj"  # hoặc .ply
-output_path = "colored_mesh_red.obj"
+# mesh_path = "ao vl.obj"  # hoặc .ply
+# output_path = "colored_mesh_red.obj"
 
-pcd_processor.transfer_colors_from_pcd_to_mesh_file(mesh_path, output_colored_mesh_path=output_path)
+# pcd_processor.transfer_colors_from_pcd_to_mesh_file(mesh_path, output_colored_mesh_path=output_path)
 
 
 
