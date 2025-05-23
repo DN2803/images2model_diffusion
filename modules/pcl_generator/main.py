@@ -20,6 +20,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 from modules.pcl_generator.depth_image import DepthImages
 from modules.pcl_generator.dense_pcl.depth_fusion import run_conversion
+
+
+from utils.format_ply_file import PointCloudProcessing
+
 @dataclass
 class GeneralConfig:
     matching_strategy: str = "bruteforce"
@@ -59,6 +63,7 @@ class PCL:
         self.match_path = self.output_dir / "matches.h5"
         self.dense_path = self.output_dir / "dense"
         self.sparse_path = self.output_dir / "sparse"
+        self.pcl = self.output_dir / "pcl_final.ply"
 
         with open("config/camera_options.yaml", "r") as file:
             self.camera_options = yaml.safe_load(file)
@@ -133,8 +138,9 @@ class PCL:
         reconstruction.write_text(self.output_dir)  # Lưu dưới dạng text
         ply_path = self.output_dir / "pcl.ply"
         reconstruction.export_PLY(str(ply_path))  # Xuất PLY
-
         logging.info(f"✅ Kết quả đã lưu tại: {ply_path}")
+        return ply_path
+        
     def save_ply_dense(self):
         """Xuất kết quả ra file PLY."""
         logging.info("📂 chuyển format sang mvs")
@@ -154,8 +160,15 @@ class PCL:
     def generate(self, config=default_config):
         """Chạy toàn bộ pipeline."""
         self.colmap_reconstruction(config=config)
-        self.save_ply_sparse()
+        ply_path = self.save_ply_sparse()
+
+        pcd_processor = PointCloudProcessing(ply_path)
+        pcd_processor.filter_with_dbscan(eps=0.13, min_points=3)
+        pcd_processor.remove_outliers()
+        pcd_processor.xyz_to_ply_color(self.pcl)
+
         # self.save_ply_dense()
+
 
     
 

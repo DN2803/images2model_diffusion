@@ -34,10 +34,10 @@ if not is_local_run:
 
 
 _TITLE = (
-    """Fast 3D Object Reconstruction and Pose Estimation from Sparse Views"""
+    """Fast 3D Object Reconstruction and Pose Estimation"""
 )
 _DESCRIPTION = (
-    """Reconstruct 3D textured mesh from one or a few unposed images!"""
+    """Reconstruct 3D textured mesh few unposed images!"""
 )
 
 
@@ -123,10 +123,10 @@ def preprocess_imgs(tmp_dir, input_img):
         img = Image.open(img_tuple[0])
         # img = center_crop_and_resize(img)
         img.save(f"{tmp_dir}/input_{i}.png")
-    #     #TODO call segmentation API
-    #     seg_img = ImageUtils.segment_img(img)
-    #     seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
-    # return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
+        #TODO call segmentation API
+        seg_img = ImageUtils.segment_img(img)
+        seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
+    return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
 
 def ply_to_glb(ply_path):
     glb_path = ply_path.replace(".ply", ".glb")
@@ -147,7 +147,7 @@ def pcd_gen(tmp_dir, use_seg):
     ws = f"{tmp_dir}/used_seg/" if use_seg else tmp_dir
     pcl_gen = PCL(ws, tmp_dir)
     pcl_gen.generate()
-    return ply_to_glb(f"{tmp_dir}/pcd.ply")
+    return f"{tmp_dir}/pcl_final.ply"
 
 def mesh_gen(tmp_dir, use_seg):
     #TODO: call API to generate mesh
@@ -269,19 +269,19 @@ def run_demo():
                             elem_id="pcl-out",
                             height=400,
                         )
-                # with gr.Row():
-                #     with gr.Column(scale=5):
-                #         mesh_output = Model3DColor(
-                #             label="Generated Mesh (color)",
-                #             elem_id="mesh-out",
-                #             height=400,
-                #         )
-                #     with gr.Column(scale=5):
-                #         mesh_output_normal = Model3DNormal(
-                #             label="Generated Mesh (normal)",
-                #             elem_id="mesh-normal-out",
-                #             height=400,
-                #         )
+                with gr.Row():
+                    with gr.Column(scale=5):
+                        mesh_output = gr.Model3D(
+                            label="Generated Mesh (color)",
+                            elem_id="mesh-out",
+                            height=400,
+                        )
+                    with gr.Column(scale=5):
+                        mesh_output_normal = gr.Model3D(
+                            label="Generated Mesh (normal)",
+                            elem_id="mesh-normal-out",
+                            height=400,
+                        )
 
         # Callbacks
         generating_mesh = gr.State(False)
@@ -425,15 +425,15 @@ def run_demo():
             outputs=[pcl_output],
             queue=True,
         ).success(
-        # ).success(
-        #     fn=lambda: None,
-        #     outputs=[mesh_output],
-        #     queue=False,
-        # ).success(
-        #     fn=lambda: None,
-        #     outputs=[mesh_output_normal],
-        #     queue=False,
-        # ).success(
+        ).success(
+            fn=lambda: None,
+            outputs=[mesh_output],
+            queue=False,
+        ).success(
+            fn=lambda: None,
+            outputs=[mesh_output_normal],
+            queue=False,
+        ).success(
             fn=partial(update_guide, "Generating the mesh...", "wait"),
             outputs=[guide_text],
             queue=False,
