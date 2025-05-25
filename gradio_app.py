@@ -84,7 +84,7 @@ def message(text, icon_type="info"):
 
 def create_tmp_dir():
     tmp_dir = (
-        "../demo_exp/"
+        "./demo_exp/"
         + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         + "_"
         + str(uuid.uuid4())[:4]
@@ -146,8 +146,9 @@ def pcd_gen(tmp_dir, use_seg):
     # o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcd)
     ws = f"{tmp_dir}/used_seg/" if use_seg else tmp_dir
     pcl_gen = PCL(ws, tmp_dir)
-    pcl_gen.generate()
-    return f"{tmp_dir}/pcl_final.ply"
+    result = pcl_gen.generate()
+    # return f"{tmp_dir}/pcl_final.ply"
+    return str(result)
 
 def mesh_gen(tmp_dir, use_seg):
     #TODO: call API to generate mesh

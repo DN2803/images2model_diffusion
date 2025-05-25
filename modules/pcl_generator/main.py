@@ -168,6 +168,7 @@ class PCL:
         pcd_processor.xyz_to_ply_color(self.pcl)
 
         # self.save_ply_dense()
+        return self.pcl
 
 
     
