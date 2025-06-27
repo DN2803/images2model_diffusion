@@ -124,9 +124,9 @@ def preprocess_imgs(tmp_dir, input_img):
         # img = center_crop_and_resize(img)
         img.save(f"{tmp_dir}/input_{i}.png")
         #TODO call segmentation API
-    #     seg_img = ImageUtils.segment_img(img)
-    #     seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
-    # return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
+        seg_img = ImageUtils.segment_img(img)
+        seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
+    return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
 
 def ply_to_glb(ply_path):
     glb_path = ply_path.replace(".ply", ".glb")
@@ -136,9 +136,9 @@ def ply_to_glb(ply_path):
 
 def pcd_gen(tmp_dir, use_seg):
     #TODO: call API to generate point cloud
-    seg_img_paths = []
-    if use_seg:
-        seg_img_paths = [f"{tmp_dir}/used_seg/{img}" for img in os.listdir(f"{tmp_dir}/used_seg")]
+    # seg_img_paths = []
+    # if use_seg:
+    #     seg_img_paths = [f"{tmp_dir}/used_seg/{img}" for img in os.listdir(f"{tmp_dir}/used_seg")]
     # gen_depth = DepthImages(seg_img_paths, f"{tmp_dir}/depth", f"{tmp_dir}/color")
     # color_paths, depth_paths = gen_depth.generator()
     # pcl = PCL()
