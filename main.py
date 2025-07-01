@@ -38,6 +38,7 @@ class ExtractorConfig:
 class MatcherConfig:
     name: str = args.model_matcher
     local_features: str = args.model_extractor
+    features: str = args.model_extractor
     input_dim: int = 128 if local_features == 'aliked' else 256
 
 @dataclass
