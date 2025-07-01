@@ -66,7 +66,7 @@ def viz():
         images_path = input_scans_path / scan / 'image'    
         input_img = list(images_path.glob('*.png')) + list(images_path.glob('*.jpg')) + list(images_path.glob('*.jpeg'))
         output_path = output_scans_path / scan / 'viz'
-        used_seg_dir = output_path / scan / 'segmentation'
+        used_seg_dir = output_path / 'segmentation'
         os.makedirs(used_seg_dir, exist_ok=True)
 
         for i, img_tuple in enumerate(input_img):
