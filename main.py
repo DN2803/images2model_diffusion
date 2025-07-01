@@ -3,7 +3,8 @@ import sys
 import os
 from pathlib import Path
 from dataclasses import dataclass, field, asdict
-
+from utils.image import ImageUtils
+from PIL import Image
 
 from modules.pcl_generator.main import PCL
 
@@ -63,8 +64,20 @@ def viz():
         print("Vizualization for scan:", scan)
         # load image 
         images_path = input_scans_path / scan / 'image'    
+        input_img = list(images_path.glob('*.png')) + list(images_path.glob('*.jpg')) + list(images_path.glob('*.jpeg'))
         output_path = output_scans_path / scan / 'viz'
-        pcl_gen = PCL(images_path, output_path)
+        used_seg_dir = output_path / scan / 'segmentation'
+        os.makedirs(used_seg_dir, exist_ok=True)
+
+        for i, img_tuple in enumerate(input_img):
+            img = Image.open(img_tuple[0])
+            img.save(output_path / f"input_{i}.png")
+            #TODO call segmentation API
+            seg_img = ImageUtils.segment_img(img)
+            seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
+
+        
+        pcl_gen = PCL(used_seg_dir, output_path)
         pcl_gen.generate(config=config)
         
 
