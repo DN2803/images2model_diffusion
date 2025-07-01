@@ -70,7 +70,7 @@ def viz():
         os.makedirs(used_seg_dir, exist_ok=True)
 
         for i, img_tuple in enumerate(input_img):
-            img = Image.open(img_tuple[0])
+            img = Image.open(img_tuple)
             img.save(output_path / f"input_{i}.png")
             #TODO call segmentation API
             seg_img = ImageUtils.segment_img(img)
