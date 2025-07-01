@@ -51,7 +51,8 @@ print(asdict(config))
 def viz():
     input_scans_path = Path(args.input_scans_path)
     output_scans_path = Path(args.output_scans_path)
-    scan_list = [d for d in os.listdir(input_scans_path) if os.path.isdir(os.path.join(input, d))]
+    scan_list = [d for d in os.listdir(input_scans_path) if os.path.isdir(os.path.join(input_scans_path, d))]
+
 
     print("Danh sách scan:", scan_list)
 
