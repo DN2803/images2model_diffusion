@@ -68,6 +68,10 @@ def viz():
         input_img = list(images_path.glob('*.png')) + list(images_path.glob('*.jpg')) + list(images_path.glob('*.jpeg'))
         output_path = output_scans_path / scan / 'viz'
         used_seg_dir = output_path / 'segmentation'
+        if used_seg_dir.exists() and any(used_seg_dir.iterdir()):
+            print(f"Scan '{scan}' đã được xử lý, bỏ qua.")
+            continue
+
         os.makedirs(used_seg_dir, exist_ok=True)
 
         for i, img_tuple in enumerate(input_img):
