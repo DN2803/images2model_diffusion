@@ -37,14 +37,14 @@ class GeneralConfig:
 
 @dataclass
 class ExtractorConfig:
-    name: str = "aliked"
+    name: str = "superpoint"
     max_keypoints: int = 4000
 
 @dataclass
 class MatcherConfig:
     name: str = "diffglue"
-    features: str = "aliked"
-    input_dim: int = 128
+    features: str = "superpoint"
+    input_dim: int = 256
 
 @dataclass
 class Config:
