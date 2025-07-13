@@ -152,6 +152,7 @@ def mesh_gen(tmp_dir, use_seg):
     # Đường dẫn tới point cloud đầu vào
     raw_pcl = os.path.join(tmp_dir, "pcl_final.ply")
     raw_pcl = Path(raw_pcl)
+    checkpoint_dir = Path(checkpoint_dir)
     # Gọi hàm sinh mesh
     ply_paths = mesh_generate(raw_pcl, checkpoint_dir)
 
