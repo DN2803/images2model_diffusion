@@ -143,7 +143,11 @@ def pcd_gen(tmp_dir, use_seg):
     pcl_gen = PCL(ws, tmp_dir)
     result = pcl_gen.generate()
     # return f"{tmp_dir}/pcl_final.ply"
-    return str(result)
+    # Convert .ply → .glb
+    glb_path = Path(tmp_dir) / "pcl_final.glb"
+    convert_ply_to_glb(str(result), str(glb_path))
+
+    return str(glb_path)
 
 def mesh_gen(tmp_dir, use_seg):
     checkpoint_dir = os.path.join(tmp_dir)
