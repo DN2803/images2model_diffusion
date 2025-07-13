@@ -18,6 +18,7 @@ from utils.image import ImageUtils
 
 from modules.pcl_generator.depth_image import DepthImages
 from modules.pcl_generator.main import PCL
+from modules.model_color.model import mesh_generate
 
 # from gradio_model3dcolor import Model3DColor
 # from gradio_model3dnormal import Model3DNormal
@@ -135,15 +136,6 @@ def ply_to_glb(ply_path):
     return glb_path
 
 def pcd_gen(tmp_dir, use_seg):
-    #TODO: call API to generate point cloud
-    # seg_img_paths = []
-    # if use_seg:
-    #     seg_img_paths = [f"{tmp_dir}/used_seg/{img}" for img in os.listdir(f"{tmp_dir}/used_seg")]
-    # gen_depth = DepthImages(seg_img_paths, f"{tmp_dir}/depth", f"{tmp_dir}/color")
-    # color_paths, depth_paths = gen_depth.generator()
-    # pcl = PCL()
-    # pcd = pcl.generate(color_paths, depth_paths)
-    # o3d.io.write_point_cloud(f"{tmp_dir}/pcd.ply", pcd)
     ws = f"{tmp_dir}/used_seg/" if use_seg else tmp_dir
     pcl_gen = PCL(ws, tmp_dir)
     result = pcl_gen.generate()
@@ -151,14 +143,20 @@ def pcd_gen(tmp_dir, use_seg):
     return str(result)
 
 def mesh_gen(tmp_dir, use_seg):
-    #TODO: call API to generate mesh
-    mesh = trimesh.load(f"{tmp_dir}/mesh.ply")
-    mesh.export(f"{tmp_dir}/mesh_normal.ply", file_type="ply")
+    checkpoint_dir = os.path.join(tmp_dir, "checkpoints")
+    os.makedirs(checkpoint_dir, exist_ok=True)
 
-    color_path = ply_to_glb(f"{tmp_dir}/mesh.ply")
-    normal_path = ply_to_glb(f"{tmp_dir}/mesh_normal.ply")
+    # Đường dẫn tới point cloud đầu vào
+    raw_pcl = os.path.join(tmp_dir, "pcl_final.ply")
 
-    return color_path, normal_path
+    # Gọi hàm sinh mesh
+    ply_paths = mesh_generate(raw_pcl, checkpoint_dir)
+
+    # Chuyển sang .glb để hiển thị bằng Model3D
+    glb_paths = [ply_to_glb(ply) for ply in ply_paths]
+
+    return glb_paths  # List các phiên bản mesh .glb theo step
+
 
 
 def feed_example_to_gallery(img):
@@ -184,25 +182,23 @@ custom_theme = gr.themes.Soft(primary_hue="blue").set(
     button_secondary_background_fill_hover="*neutral_200",
 )
 
-def run_demo(): 
-
-
-    # Gradio blocks
+def run_demo():
     with gr.Blocks(title=_TITLE, css="style.css", theme=custom_theme) as demo:
         tmp_dir_unposed = gr.State("./demo_exp/placeholder")
+        mesh_steps = gr.State([])
+
         display_folder = os.path.join(os.path.dirname(__file__), "examples_display")
-        os.makedirs("examples_display", exist_ok=True)
-        display_fns = os.listdir(display_folder)
-        display_fns.sort()
+        os.makedirs(display_folder, exist_ok=True)
+        display_fns = sorted(os.listdir(display_folder))
         display_imgs = []
         for i, display_fn in enumerate(display_fns):
             file_path = os.path.join(display_folder, display_fn)
             img = Image.open(file_path)
             img.filename = i
             display_imgs.append([img])
+
         data_folder = os.path.join(os.path.dirname(__file__), "examples_data")
 
-        # UI
         with gr.Row():
             gr.Markdown("# " + _TITLE)
         with gr.Row():
@@ -211,34 +207,20 @@ def run_demo():
             guide_text = gr.HTML(
                 message("Input image(s) of object that you want to generate mesh with.")
             )
+
         with gr.Row(variant="panel"):
             with gr.Column():
                 with gr.Row():
                     with gr.Column(scale=5):
                         input_gallery = gr.Gallery(
-                            label="Input Images",
-                            show_label=False,
-                            columns=[3],
-                            rows=[2],
-                            object_fit="contain",
-                            height=400,
-                            show_share_button=False,
+                            label="Input Images", columns=[3], rows=[2], object_fit="contain", height=400
                         )
-                        input_image = gr.Image(
-                            type="pil",
-                            image_mode="RGBA",
-                            visible=False,
-                        )
+                        input_image = gr.Image(type="pil", image_mode="RGBA", visible=False)
                     with gr.Column(scale=5):
                         processed_gallery = gr.Gallery(
-                            label="Background Removal",
-                            columns=[3],
-                            rows=[2],
-                            object_fit="contain",
-                            height=400,
-                            interactive=False,
-                            show_share_button=False,
+                            label="Background Removal", columns=[3], rows=[2], object_fit="contain", height=400
                         )
+
                 with gr.Row():
                     with gr.Column(scale=5):
                         example = gr.Examples(
@@ -251,227 +233,130 @@ def run_demo():
                             run_on_click=True,
                         )
                     with gr.Column(scale=5):
-                        with gr.Row():
-                            bg_removed_checkbox = gr.Checkbox(
-                                value=True,
-                                label="Use background removed images (uncheck to use original)",
-                                interactive=True,
-                            )
-                        with gr.Row():
-                            run_btn = gr.Button(
-                                "Generate",
-                                variant="primary",
-                                interactive=False,
-                            )
+                        bg_removed_checkbox = gr.Checkbox(
+                            value=True,
+                            label="Use background removed images (uncheck to use original)",
+                            interactive=True,
+                        )
+                        run_btn = gr.Button("Generate", variant="primary", interactive=False)
+
                 with gr.Row():
-                    with gr.Column(scale=5):
-                        pcl_output = gr.Model3D(
-                            label="Generated Point Cloud",
-                            elem_id="pcl-out",
-                            height=400,
-                        )
+                    pcl_output = gr.Model3D(label="Generated Point Cloud", elem_id="pcl-out", height=400)
+
                 with gr.Row():
-                    with gr.Column(scale=5):
-                        mesh_output = gr.Model3D(
-                            label="Generated Mesh (color)",
-                            elem_id="mesh-out",
-                            height=400,
-                        )
-                    with gr.Column(scale=5):
-                        mesh_output_normal = gr.Model3D(
-                            label="Generated Mesh (normal)",
-                            elem_id="mesh-normal-out",
-                            height=400,
-                        )
+                    mesh_step_slider = gr.Slider(
+                        minimum=0, maximum=10, step=1, value=0, label="Mesh Optimization Step"
+                    )
+                with gr.Row():
+                    mesh_progress_output = gr.Model3D(label="Mesh Optimization Preview", height=400)
 
         # Callbacks
         generating_mesh = gr.State(False)
         disable_button = lambda: gr.Button(interactive=False)
         enable_button = lambda: gr.Button(interactive=True)
-        update_guide = lambda GUIDE_TEXT, icon_type="info": gr.HTML(
-            value=message(GUIDE_TEXT, icon_type)
-        )
+        update_guide = lambda text, icon_type="info": gr.HTML(value=message(text, icon_type))
 
         def is_cleared(content):
             if content:
-                raise ValueError  # gr.Error(visible=False) doesn't work, trick for not showing error message
+                raise ValueError
 
         def not_cleared(content):
             if not content:
                 raise ValueError
 
         def toggle_mesh_generation_status(generating_mesh):
-            generating_mesh = not generating_mesh
-            return generating_mesh
+            return not generating_mesh
 
         def is_generating_mesh(generating_mesh):
             if generating_mesh:
                 raise ValueError
 
-        # Upload event listener for input gallery
+        def update_mesh_step(mesh_list, step):
+            if 0 <= step < len(mesh_list):
+                return mesh_list[step]
+            return None
+
         input_gallery.upload(
-            fn=disable_button,
-            outputs=[run_btn],
-            queue=False,
+            fn=disable_button, outputs=[run_btn], queue=False
         ).success(
-            fn=create_tmp_dir,
-            outputs=[tmp_dir_unposed],
-            queue=True,
+            fn=create_tmp_dir, outputs=[tmp_dir_unposed], queue=True
         ).success(
-            fn=partial(
-                update_guide, "Removing background of the input image(s)...", "wait"
-            ),
+            fn=partial(update_guide, "Removing background of the input image(s)...", "wait"),
             outputs=[guide_text],
-            queue=False,
         ).success(
-            fn=preprocess_imgs,
-            inputs=[tmp_dir_unposed, input_gallery],
-            outputs=[processed_gallery],
-            queue=True,
+            fn=preprocess_imgs, inputs=[tmp_dir_unposed, input_gallery], outputs=[processed_gallery], queue=True
         ).success(
             fn=partial(update_guide, "Click <b>Generate</b> to generate mesh.", "cursor"),
             outputs=[guide_text],
-            queue=False,
         ).success(
-            fn=is_generating_mesh,
-            inputs=[generating_mesh],
-            queue=False,
+            fn=is_generating_mesh, inputs=[generating_mesh]
         ).success(
-            fn=enable_button,
-            outputs=[run_btn],
-            queue=False,
+            fn=enable_button, outputs=[run_btn]
         )
 
-        # Clear event listener for input gallery
-        input_gallery.change(
-            fn=is_cleared,
-            inputs=[input_gallery],
-            queue=False,
-        ).success(
-            fn=disable_button,
-            outputs=[run_btn],
-            queue=False,
-        ).success(
-            fn=lambda: None,
-            outputs=[input_image],
-            queue=False,
-        ).success(
-            fn=lambda: None,
-            outputs=[processed_gallery],
-            queue=False,
-        ).success(
-            fn=partial(
-                update_guide,
-                "Input image(s) of object that you want to generate mesh with.",
-                "info",
-            ),
-            outputs=[guide_text],
-            queue=False,
-        )
-
-        # Change event listener for input image
         input_image.change(
-            fn=not_cleared,
-            inputs=[input_image],
-            queue=False,
+            fn=not_cleared, inputs=[input_image]
         ).success(
-            fn=disable_button,
-            outputs=run_btn,
-            queue=False,
+            fn=disable_button, outputs=[run_btn]
         ).success(
-            fn=create_tmp_dir,
-            outputs=tmp_dir_unposed,
-            queue=True,
+            fn=create_tmp_dir, outputs=[tmp_dir_unposed]
         ).success(
-            fn=partial(
-                update_guide, "Removing background of the input image(s)...", "wait"
-            ),
+            fn=partial(update_guide, "Removing background of the input image(s)...", "wait"),
             outputs=[guide_text],
-            queue=False,
         ).success(
-            fn=preprocess_imgs,
-            inputs=[tmp_dir_unposed, input_gallery],
-            outputs=[processed_gallery],
-            queue=True,
+            fn=preprocess_imgs, inputs=[tmp_dir_unposed, input_gallery], outputs=[processed_gallery], queue=True
         ).success(
             fn=partial(update_guide, "Click <b>Generate</b> to generate mesh.", "cursor"),
             outputs=[guide_text],
-            queue=False,
         ).success(
-            fn=is_generating_mesh,
-            inputs=[generating_mesh],
-            queue=False,
+            fn=is_generating_mesh, inputs=[generating_mesh]
         ).success(
-            fn=enable_button,
-            outputs=run_btn,
-            queue=False,
+            fn=enable_button, outputs=[run_btn]
         )
 
-        # Click event listener for run button
         run_btn.click(
-            fn=disable_button,
-            outputs=[run_btn],
-            queue=False,
+            fn=disable_button, outputs=[run_btn]
         ).success(
-            fn=lambda: None,
-            outputs=[pcl_output],
-            queue=False,
+            fn=lambda: None, outputs=[pcl_output]
         ).success(
             fn=partial(update_guide, "Generating the point cloud...", "wait"),
-            outputs=[guide_text],
-            queue=False,
+            outputs=[guide_text]
         ).success(
-            fn=pcd_gen,
-            inputs=[tmp_dir_unposed, bg_removed_checkbox],
-            outputs=[pcl_output],
-            queue=True,
-        ).success(
-        ).success(
-            fn=lambda: None,
-            outputs=[mesh_output],
-            queue=False,
-        ).success(
-            fn=lambda: None,
-            outputs=[mesh_output_normal],
-            queue=False,
+            fn=pcd_gen, inputs=[tmp_dir_unposed, bg_removed_checkbox], outputs=[pcl_output], queue=True
         ).success(
             fn=partial(update_guide, "Generating the mesh...", "wait"),
-            outputs=[guide_text],
-            queue=False,
+            outputs=[guide_text]
         ).success(
-            fn=toggle_mesh_generation_status,
-            inputs=[generating_mesh],
-            outputs=[generating_mesh],
-            queue=False,
+            fn=toggle_mesh_generation_status, inputs=[generating_mesh], outputs=[generating_mesh]
         ).success(
-            fn=mesh_gen,
-            inputs=[tmp_dir_unposed, bg_removed_checkbox],
-            # outputs=[mesh_output, mesh_output_normal],
-            queue=True,
+            fn=mesh_gen, inputs=[tmp_dir_unposed, bg_removed_checkbox], outputs=[mesh_steps], queue=True
         ).success(
-            fn=toggle_mesh_generation_status,
-            inputs=[generating_mesh],
-            outputs=[generating_mesh],
-            queue=False,
+            fn=toggle_mesh_generation_status, inputs=[generating_mesh], outputs=[generating_mesh]
         ).success(
-            fn=partial(
-                update_guide,
-                "Successfully generated the mesh. (It might take a few seconds to load the mesh)",
-                "done",
-            ),
-            outputs=[guide_text],
-            queue=False,
+            fn=lambda glbs: glbs[0] if glbs else None,
+            inputs=[mesh_steps],
+            outputs=[mesh_progress_output]
         ).success(
-            fn=not_cleared,
-            inputs=[input_gallery],
-            queue=False,
+            fn=lambda glbs: len(glbs) - 1 if glbs else 1,
+            inputs=[mesh_steps],
+            outputs=[mesh_step_slider]
         ).success(
-            fn=enable_button,
-            outputs=[run_btn],
-            queue=False,
+            fn=partial(update_guide, "Successfully generated the mesh.", "done"),
+            outputs=[guide_text]
+        ).success(
+            fn=not_cleared, inputs=[input_gallery]
+        ).success(
+            fn=enable_button, outputs=[run_btn]
+        )
+
+        mesh_step_slider.change(
+            fn=update_mesh_step,
+            inputs=[mesh_steps, mesh_step_slider],
+            outputs=[mesh_progress_output]
         )
 
     demo.launch(share=True)
+
 
 if __name__ == "__main__":
     run_demo()
