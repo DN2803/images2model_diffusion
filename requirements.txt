@@ -25,3 +25,4 @@ kornia
 exifread
 h5py
 pydegensac
+plyfile
