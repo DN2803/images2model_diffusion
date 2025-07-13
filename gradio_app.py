@@ -22,6 +22,7 @@ from pathlib import Path
 repo_root = Path('./Surface-Reconstruction-from-Point-Cloud-Point2Mesh').resolve()
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
+    print(f"Added {repo_root} to sys.path")
 from modules.model_color.model import mesh_generate
 
 # from gradio_model3dcolor import Model3DColor
