@@ -16,6 +16,12 @@ import trimesh
 from PIL import Image, ImageChops
 import open3d as o3d
 
+
+
+
+from utils.image import ImageUtils
+from modules.pcl_generator.depth_image import DepthImages
+from modules.pcl_generator.main import PCL
 # 1. Thêm thư mục Point2Mesh vào sys.path
 current_dir = Path(__file__).resolve().parent
 point2mesh_dir = current_dir / "Surface-Reconstruction-from-Point-Cloud-Point2Mesh"
@@ -23,11 +29,6 @@ point2mesh_dir = current_dir / "Surface-Reconstruction-from-Point-Cloud-Point2Me
 if str(point2mesh_dir) not in sys.path:
     sys.path.insert(0, str(point2mesh_dir))
     print(f"✅ Added {point2mesh_dir} to sys.path")
-
-# 2. Import sau khi đã thêm sys.path
-from utils.image import ImageUtils
-from modules.pcl_generator.depth_image import DepthImages
-from modules.pcl_generator.main import PCL
 from modules.model_color.model import mesh_generate
 
 
