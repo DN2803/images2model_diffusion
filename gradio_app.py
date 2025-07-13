@@ -16,17 +16,6 @@ import trimesh
 from PIL import Image, ImageChops
 import open3d as o3d
 
-
-# Thêm root project (chứa modules, models, utils) vào sys.path
-project_root = Path(__file__).resolve().parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))  # ưu tiên models đúng
-
-# Sau đó mới thêm Point2Mesh
-point2mesh_dir = project_root / "Surface-Reconstruction-from-Point-Cloud-Point2Mesh"
-if str(point2mesh_dir) not in sys.path:
-    sys.path.append(str(point2mesh_dir))  # không insert trước
-
 # 2. Import sau khi đã thêm sys.path
 from utils.image import ImageUtils
 from modules.pcl_generator.depth_image import DepthImages
