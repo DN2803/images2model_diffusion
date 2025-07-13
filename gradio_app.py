@@ -132,11 +132,11 @@ def preprocess_imgs(tmp_dir, input_img):
         seg_img.save(os.path.join(used_seg_dir, f"seg_{i}.png"))
     return [Image.open(os.path.join(used_seg_dir, f"seg_{i}.png")) for i in range(len(input_img))]
 
-def ply_to_glb(ply_path):
-    glb_path = ply_path.replace(".ply", ".glb")
-    mesh = trimesh.load(ply_path)
-    mesh.export(glb_path)
-    return glb_path
+def convert_ply_to_glb(ply_path, glb_path):
+    pcd = o3d.io.read_point_cloud(ply_path)
+    # Convert point cloud to mesh (fake with alpha shape or ball pivoting)
+    mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(pcd, alpha=0.03)
+    o3d.io.write_triangle_mesh(glb_path, mesh, write_ascii=True)
 
 def pcd_gen(tmp_dir, use_seg):
     ws = f"{tmp_dir}/used_seg/" if use_seg else tmp_dir
@@ -146,7 +146,7 @@ def pcd_gen(tmp_dir, use_seg):
     return str(result)
 
 def mesh_gen(tmp_dir, use_seg):
-    checkpoint_dir = os.path.join(tmp_dir, "checkpoints")
+    checkpoint_dir = os.path.join(tmp_dir)
     os.makedirs(checkpoint_dir, exist_ok=True)
 
     # Đường dẫn tới point cloud đầu vào
