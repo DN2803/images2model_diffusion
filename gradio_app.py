@@ -20,7 +20,7 @@ import open3d as o3d
 from utils.image import ImageUtils
 from modules.pcl_generator.depth_image import DepthImages
 from modules.pcl_generator.main import PCL
-from modules.model_color.model import mesh_generate
+# from modules.model_color.model import mesh_generate
 
 
 # from gradio_model3dcolor import Model3DColor
@@ -149,19 +149,45 @@ def pcd_gen(tmp_dir, use_seg):
 
     return str(glb_path)
 
-def mesh_gen(tmp_dir, use_seg):
-    checkpoint_dir = os.path.join(tmp_dir)
-    os.makedirs(checkpoint_dir, exist_ok=True)
+# def mesh_gen(tmp_dir, use_seg):
+#     checkpoint_dir = os.path.join(tmp_dir)
+#     os.makedirs(checkpoint_dir, exist_ok=True)
 
-    # Đường dẫn tới point cloud đầu vào
-    raw_pcl = os.path.join(tmp_dir, "pcl_final.ply")
-    raw_pcl = Path(raw_pcl)
-    checkpoint_dir = Path(checkpoint_dir)
-    # Gọi hàm sinh mesh
-    ply_paths = mesh_generate(raw_pcl, checkpoint_dir)
+#     # Đường dẫn tới point cloud đầu vào
+#     raw_pcl = os.path.join(tmp_dir, "pcl_final.ply")
+#     raw_pcl = Path(raw_pcl)
+#     checkpoint_dir = Path(checkpoint_dir)
+#     # Gọi hàm sinh mesh
+#     ply_paths = mesh_generate(raw_pcl, checkpoint_dir)
 
     
-    return ply_paths
+#     return ply_paths
+def mesh_generate(raw_pcl: Path, checkpoint_dir: Path):
+    pcd = o3d.io.read_point_cloud(str(raw_pcl))
+
+    if not pcd.has_normals():
+        print("[INFO] Estimating normals...")
+        pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
+        pcd.orient_normals_consistent_tangent_plane(100)
+
+    print("[INFO] Running Screened Poisson Reconstruction...")
+    mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=9)
+
+    print("[INFO] Removing low density vertices...")
+    densities = np.asarray(densities)
+    vertices_to_keep = densities > np.quantile(densities, 0.01)
+    mesh = mesh.select_by_index(np.where(vertices_to_keep)[0])
+
+    # Lưu .glb
+    mesh_path = checkpoint_dir / "mesh_poisson.glb"
+    o3d.io.write_triangle_mesh(str(mesh_path), mesh)
+
+    return [str(mesh_path)]
+
+def mesh_gen(tmp_dir, use_seg):
+    checkpoint_dir = Path(tmp_dir)
+    raw_pcl = checkpoint_dir / "pcl_final.ply"
+    return mesh_generate(raw_pcl, checkpoint_dir)
 
 
 
