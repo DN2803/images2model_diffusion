@@ -1,30 +1,23 @@
-import sys
-import os
 from pathlib import Path
 from glob import glob
-
+import os
 from utils.format_ply_file import PointCloudProcessing
-
-
-
-# 3. Gọi hàm run_mesh
-from mesh_runner import run_mesh
+from modules.model_color.mesh_runner_wrapper import run_mesh  # ✅ dùng wrapper an toàn
 
 def mesh_generate(pcl: Path, output_dir: Path):
-    # Gọi thuật toán Point2Mesh để sinh ra nhiều mesh intermediate
     pcd_processor = PointCloudProcessing(pcl)
     no_color_ply = pcl.stem + '_nocolor.ply'
     pcd_processor.xyz_to_ply_nocolor(no_color_ply)
+
     run_mesh(
         input_pcl=no_color_ply,
         output_path=output_dir,
         args_list=[
-        '--iterations', '3000',
-        '--save-path', str(output_dir),
-        '--input-pc', str(no_color_ply),
+            '--iterations', '3000',
+            '--save-path', str(output_dir),
+            '--input-pc', str(no_color_ply),
         ]
     )
 
-    # Lấy danh sách mesh theo thứ tự thời gian (hoặc theo tên nếu đặt đúng)
     ply_files = sorted(glob(os.path.join(output_dir, "mesh_*.ply")))
     return ply_files
