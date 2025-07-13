@@ -1,29 +1,35 @@
-# Description: Gradio app for 3D object reconstruction and pose estimation from sparse views.
+# gradio_app.py
+
 import os
 import sys
-import json
 import uuid
-import numpy as np
-import gradio as gr
-import trimesh
+import json
 import zipfile
 import subprocess
 from datetime import datetime
 from functools import partial
+from pathlib import Path
+
+import numpy as np
+import gradio as gr
+import trimesh
 from PIL import Image, ImageChops
 import open3d as o3d
-# from huggingface_hub import snapshot_download
 
+# 1. Thêm thư mục Point2Mesh vào sys.path
+current_dir = Path(__file__).resolve().parent
+point2mesh_dir = current_dir / "Surface-Reconstruction-from-Point-Cloud-Point2Mesh"
+
+if str(point2mesh_dir) not in sys.path:
+    sys.path.insert(0, str(point2mesh_dir))
+    print(f"✅ Added {point2mesh_dir} to sys.path")
+
+# 2. Import sau khi đã thêm sys.path
 from utils.image import ImageUtils
-
 from modules.pcl_generator.depth_image import DepthImages
 from modules.pcl_generator.main import PCL
-from pathlib import Path
-repo_root = Path('./Surface-Reconstruction-from-Point-Cloud-Point2Mesh').resolve()
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
-    print(f"Added {repo_root} to sys.path")
 from modules.model_color.model import mesh_generate
+
 
 # from gradio_model3dcolor import Model3DColor
 # from gradio_model3dnormal import Model3DNormal
