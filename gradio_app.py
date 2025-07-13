@@ -151,14 +151,12 @@ def mesh_gen(tmp_dir, use_seg):
 
     # Đường dẫn tới point cloud đầu vào
     raw_pcl = os.path.join(tmp_dir, "pcl_final.ply")
-
+    raw_pcl = Path(raw_pcl)
     # Gọi hàm sinh mesh
     ply_paths = mesh_generate(raw_pcl, checkpoint_dir)
 
-    # Chuyển sang .glb để hiển thị bằng Model3D
-    glb_paths = [ply_to_glb(ply) for ply in ply_paths]
-
-    return glb_paths  # List các phiên bản mesh .glb theo step
+    
+    return ply_paths
 
 
 

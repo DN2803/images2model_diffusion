@@ -7,7 +7,7 @@ point2mesh_root = Path(__file__).resolve().parent.parent.parent / "Surface-Recon
 point2mesh_models = point2mesh_root / "models"
 
 if str(point2mesh_models) not in sys.path:
-    sys.path.insert(0, str(point2mesh_models))  # 👈 Ưu tiên models đúng
+    sys.path.insert(0, str(point2mesh_root))  # 👈 Ưu tiên models đúng
 
 # ✅ Import an toàn qua alias
 mesh_runner_path = point2mesh_root / "mesh_runner.py"
