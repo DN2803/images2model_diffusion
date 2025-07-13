@@ -5,9 +5,11 @@ from glob import glob
 
 from utils.format_ply_file import PointCloudProcessing
 
-repo_root = Path('./Surface-Reconstruction-from-Point-Cloud-Point2Mesh')
+
+repo_root = Path('./Surface-Reconstruction-from-Point-Cloud-Point2Mesh').resolve()
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
+
 
 # 3. Gọi hàm run_mesh
 from mesh_runner import run_mesh
