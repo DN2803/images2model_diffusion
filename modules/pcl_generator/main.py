@@ -164,7 +164,7 @@ class PCL:
 
         pcd_processor = PointCloudProcessing(ply_path)
         pcd_processor.filter_with_dbscan(eps=0.13, min_points=3)
-        pcd_processor.remove_outliers()
+        # pcd_processor.remove_outliers()
         pcd_processor.xyz_to_ply_color(self.pcl)
 
         # self.save_ply_dense()
