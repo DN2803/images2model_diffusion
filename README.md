@@ -31,6 +31,13 @@ git clone https://github.com/DN2803/Surface-Reconstruction-from-Point-Cloud-Poin
 ### 4. Tích hợp với pipeline chính
 Quay lại repo images2model_diffusion, bạn có thể gọi Point2Mesh từ script run_point2mesh.py với dữ liệu từ bước trước
 
+### 5. Demo
+Bạn có thể chạy demo bằng cách chạy script run_gradio.py tuy nhiên với phương pháp mesh đang sử dử dụng screend poision 
+```bash
+python gradio_app.py
+```
+Nếu bạn muốn sử dụng P2M để tái tạo mesh vui lòng sử dụng theo hướng dẫn trong file [DEMO](https://colab.research.google.com/drive/1lykKKhVc4ovpUTtl7Wn92Xwv2guhxaFJ?usp=drive_link)
+Mọi kết quả thực nghiệm đều có thể tìm thấy tại [đây](https://drive.google.com/drive/folders/14RXzvRWf4yn2D5JvKaeuly61RYK3BYIp?usp=sharing)
 ## 📌 Yêu cầu phần cứng
 
 GPU >= 8GB VRAM (khuyến nghị sử dụng NVIDIA CUDA)
