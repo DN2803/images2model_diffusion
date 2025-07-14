@@ -8,12 +8,6 @@ Dự án này trình bày pipeline tái tạo mô hình 3D từ ảnh đầu và
 
 ## 📂 Cấu trúc dự án
 
-images2model_diffusion/
-
-├── utils/
-│ └── helper_functions.py
-├── requirements.txt
-└── README.md
 
 
 ## 🚀 Cài đặt
